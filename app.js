@@ -7,25 +7,27 @@
   var $ = function (id) { return document.getElementById(id); };
   var EL_KO = { wood: '나무', fire: '불', earth: '흙', metal: '쇠', water: '물' };
   var EL_ORDER = ['wood', 'fire', 'earth', 'metal', 'water'];
+  // 시·도 단위 (도는 도의 가운데쯤 경도). 경도 1도 차이는 시각 약 4분 차이라, 같은 도 안에서는 결과가 거의 같다.
   var PLACES = [
-    ['서울', 126.98], ['인천', 126.71], ['수원·경기 남부', 127.03], ['의정부·경기 북부', 127.05], ['춘천', 127.73], ['강릉', 128.88],
-    ['대전', 127.38], ['세종', 127.29], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['광주', 126.85], ['목포', 126.39],
-    ['대구', 128.60], ['포항', 129.37], ['안동', 128.73], ['부산', 129.08], ['울산', 129.31], ['창원', 128.68], ['진주', 128.11],
-    ['제주', 126.53], ['잘 모름 (서울로 계산)', 126.98]
+    ['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.71], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29],
+    ['경기도', 127.20], ['강원도', 128.30], ['충청북도', 127.70], ['충청남도', 126.90], ['전라북도', 127.10], ['전라남도', 126.90],
+    ['경상북도', 128.70], ['경상남도', 128.40], ['제주도', 126.53], ['북한 지역', 126.50], ['해외 · 잘 모름 (서울로 계산)', 126.98]
   ];
+  function placeIndex(name) { for (var i = 0; i < PLACES.length; i++) if (PLACES[i][0] === name) return i; return -1; }
   var STORE_KEY = 'byeolbit-saju-last';
   var POP_KEY = 'byeolbit-saju-lucky-day';
   var luckyToday = null;
   function fillLucky(pre, L) {
     var it = L.it, ph = $(pre + 'Photo');
     $(pre + 'Name').textContent = it.name;
-    $(pre + 'Why').textContent = it.why;
+    $(pre + 'Why').innerHTML = esc(it.why) + (it.product ? '<small class="li-prod">' + esc(it.product) + '</small>' : '');
     $(pre + 'Link').href = L.href;
     ph.href = L.href;
     ph.style.setProperty('--li-col', L.col);
     if (it.img) {
       ph.style.backgroundImage = '';
-      ph.innerHTML = '<img alt="' + it.name.replace(/"/g, '') + '" src="' + it.img + '" loading="lazy"><span class="li-tag">쿠팡</span>';
+      ph.innerHTML = '<img alt="' + it.name.replace(/"/g, '') + '" src="' + it.img + '"><span class="li-tag">쿠팡</span>';
+      ph.querySelector('img').onerror = function () { var card = ph.closest('.lucky-card'); if (card) card.hidden = true; };
     } else {
       ph.style.display = 'none';
       ph.innerHTML = '<span class="li-tag">' + { wood: '나무', fire: '불', earth: '흙', metal: '쇠', water: '물' }[L.el] + ' 기운</span><span class="li-ph">' + it.q + '</span>';
@@ -40,11 +42,17 @@
     var seen = null;
     try { seen = localStorage.getItem(POP_KEY); } catch (e) { }
     if (seen === luckyToday.day) return; // 하루 한 번만
-    try { localStorage.setItem(POP_KEY, luckyToday.day); } catch (e) { }
-    fillLucky('lp', luckyToday);
-    $('luckyModal').hidden = false;
-    sfx('open');
-    $('lpSkip').focus();
+    // 상품 사진이 다 받아진 뒤에만 띄운다 (사진이 안 열리면 창을 띄우지 않음)
+    var pre = new Image();
+    pre.onload = function () {
+      if ($('viewResult').hidden) return; // 그사이 다른 화면으로 갔으면 띄우지 않음
+      try { localStorage.setItem(POP_KEY, luckyToday.day); } catch (e) { }
+      fillLucky('lp', luckyToday);
+      $('luckyModal').hidden = false;
+      sfx('open');
+      $('lpSkip').focus();
+    };
+    pre.src = luckyToday.it.img;
   }
   function closeLucky() { $('luckyModal').hidden = true; }
   var SLUG_S = ['gap', 'eul', 'byeong', 'jeong', 'mu', 'gi', 'gyeong', 'sin', 'im', 'gye'];
@@ -113,7 +121,11 @@
     opt($('fHour'), h, ap + ' ' + hh + '시', h === 12);
   }
   for (var mi = 0; mi < 60; mi++) opt($('fMin'), mi, mi + '분', mi === 0);
-  PLACES.forEach(function (p, i) { opt($('fPlace'), i, p[0], i === 0); });
+  opt($('fPlace'), '', '태어난 곳을 골라 주세요', true);
+  $('fPlace').options[0].disabled = true;
+  PLACES.forEach(function (p, i) { opt($('fPlace'), i, p[0], false); });
+  $('fPlace').addEventListener('change', function () { this.classList.toggle('empty', this.value === ''); });
+  $('fPlace').classList.add('empty');
 
   $('fYear').addEventListener('change', fillDays);
   $('fMonth').addEventListener('change', fillDays);
@@ -143,7 +155,8 @@
       $('fNoTime').checked = s.hour == null;
       $('fHour').disabled = $('fMin').disabled = s.hour == null;
       if (s.hour != null) { $('fHour').value = s.hour; $('fMin').value = s.minute; }
-      $('fPlace').value = s.place || 0;
+      var pi = placeIndex(s.placeName || '');
+      if (pi >= 0) { $('fPlace').value = pi; $('fPlace').classList.remove('empty'); }
       $('fJasi').value = s.jasi || 'jojasi';
       $('fNoCorr').checked = !!s.noCorr;
     } catch (e) { /* 저장 안 되는 환경 */ }
@@ -151,7 +164,7 @@
   loadLast();
 
   function readForm() {
-    var place = PLACES[+$('fPlace').value] || PLACES[0];
+    var pv = $('fPlace').value, place = pv === '' ? null : PLACES[+pv];
     var noTime = $('fNoTime').checked;
     return {
       name: $('fName').value.trim(),
@@ -160,7 +173,7 @@
       leap: $('fLeap').checked,
       year: +$('fYear').value, month: +$('fMonth').value, day: +$('fDay').value,
       hour: noTime ? null : +$('fHour').value, minute: noTime ? null : +$('fMin').value,
-      place: +$('fPlace').value, longitude: place[1],
+      placeName: place ? place[0] : '', longitude: place ? place[1] : 126.98,
       jasi: $('fJasi').value, noCorr: $('fNoCorr').checked, solarCorrection: !$('fNoCorr').checked
     };
   }
@@ -168,6 +181,7 @@
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var input = readForm();
+    if (!input.placeName) { $('formErr').textContent = '태어난 곳을 골라 주세요. 모르면 맨 아래 "해외 · 잘 모름"을 고르면 돼요.'; $('fPlace').focus(); return; }
     var result;
     try { result = E.calculate(input); }
     catch (e) { $('formErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
@@ -339,7 +353,7 @@
   }
 
   function goInput(clear) {
-    if (clear) { $('fName').value = ''; }
+    if (clear) { $('fName').value = ''; $('fPlace').value = ''; $('fPlace').classList.add('empty'); }
     $('viewResult').hidden = true; $('viewInput').hidden = false; scrollTo(0, 0);
   }
   $('btnAgain').addEventListener('click', function () { goInput(false); });
