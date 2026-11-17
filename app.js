@@ -14,6 +14,8 @@
     ['제주', 126.53], ['잘 모름 (서울로 계산)', 126.98]
   ];
   var STORE_KEY = 'byeolbit-saju-last';
+  var SLUG_S = ['gap', 'eul', 'byeong', 'jeong', 'mu', 'gi', 'gyeong', 'sin', 'im', 'gye'];
+  var SLUG_B = ['ja', 'chuk', 'in', 'myo', 'jin', 'sa', 'o', 'mi', 'sin', 'yu', 'sul', 'hae'];
 
   // ---------- 별 하늘 ----------
   var sky = $('stars'), sctx = sky.getContext('2d'), stars = [], shooting = null, dpr = 1;
@@ -250,7 +252,8 @@
     document.querySelector('#rIljuTitle').previousElementSibling.textContent = '나의 일주 · ' + r.pillars.day.ko + '일주 (' + r.pillars.day.hanja + ')';
     $('rIlju').innerHTML = [['성격', il.personality], ['일과 재능', il.work], ['사랑과 관계', il.love], ['이런 점을 챙겨요', il.care]]
       .filter(function (x) { return x[1]; })
-      .map(function (x) { return '<div><b>' + x[0] + '</b>' + x[1] + '</div>'; }).join('');
+      .map(function (x) { return '<div><b>' + x[0] + '</b>' + x[1] + '</div>'; }).join('') +
+      '<a class="ilju-more" href="ilju/' + SLUG_S[r.pillars.day.stem] + SLUG_B[r.pillars.day.branch] + '.html">' + r.pillars.day.ko + '일주 더 알아보기 · 60일주 모아보기 →</a>';
 
     // 오늘의 운세
     var td = seoulToday(), tp = E.dayPillarOf(td.y, td.m, td.d);
@@ -267,6 +270,22 @@
     var lc = (T.luckyColor || {})[le] || { name: FALLBACK_COLOR[le][0], hex: FALLBACK_COLOR[le][1] };
     $('rLuckyColor').innerHTML = '<i style="background:' + lc.hex + ';color:' + lc.hex + '"></i>' + lc.name;
     $('rLuckyNum').textContent = (seed >>> 3) % 9 + 1;
+    // 오늘의 행운 아이템: 행운의 색과 같은 기운에서 날마다 하나
+    var LK = window.SAJU_LUCKY;
+    if (LK && LK.items[le]) {
+      var list = LK.items[le], it = list[(seed >>> 7) % list.length];
+      var useP = LK.PARTNER.enabled && it.link;
+      $('rLiName').textContent = it.name;
+      $('rLiWhy').textContent = it.why;
+      $('rLiIcon').textContent = { wood: '木', fire: '火', earth: '土', metal: '金', water: '水' }[le];
+      $('rLiIcon').style.fontFamily = 'var(--hanja)';
+      $('rLuckyItem').style.setProperty('--li-col', lc.hex);
+      $('rLiLink').href = useP ? it.link : 'https://www.coupang.com/np/search?q=' + encodeURIComponent(it.q);
+      $('rLiLink').textContent = '쿠팡에서 보기 ↗';
+      $('rLiNotice').hidden = !useP;
+      $('rLiNotice').textContent = useP ? LK.PARTNER.notice : '';
+      $('rLuckyItem').hidden = false;
+    } else { $('rLuckyItem').hidden = true; }
 
     $('rNotes').innerHTML = r.notes.map(function (n) { return '<li>' + n + '</li>'; }).join('') +
       '<li>이달의 기준 절기: ' + r.monthTerm.name + '</li>';

@@ -7,6 +7,7 @@
 <meta name="description" content="생년월일시만 넣으면 사주 8글자, 다섯 기운, 일주 풀이, 오늘의 운세를 무료로 보여드려요. 가입 없이, 정보는 내 휴대폰 안에서만 계산해요.">
 <meta name="theme-color" content="#120a2e">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://starlinelabsstudio-dotcom.github.io/byeolbit-saju/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="별빛 사주 — 별이 읽어주는 나의 사주">
 <meta property="og:description" content="생년월일시만 넣으면 사주 8글자, 다섯 기운, 오늘의 운세를 무료로. 가입 없이 바로 봐요.">
@@ -16,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.4.3">
+<link rel="stylesheet" href="style.css?v=0.5.0">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -96,6 +97,7 @@
       <button class="btn-main" type="submit">✦ 내 사주 보기</button>
       <p class="privacy">입력한 정보는 이 휴대폰 안에서만 계산해요. 어디에도 보내지 않아요.</p>
     </form>
+    <a class="glass more-link" href="ilju/">✧ 60일주 성격 풀이 모아보기 <span>→</span></a>
   </section>
 
   <!-- 결과 -->
@@ -138,6 +140,16 @@
         <div><span>행운의 색</span><b id="rLuckyColor"></b></div>
         <div><span>행운의 숫자</span><b id="rLuckyNum"></b></div>
       </div>
+      <div class="lucky-item" id="rLuckyItem">
+        <div class="li-icon" id="rLiIcon">✦</div>
+        <div class="li-body">
+          <span>오늘의 행운 아이템</span>
+          <b id="rLiName"></b>
+          <p id="rLiWhy"></p>
+        </div>
+        <a class="li-btn" id="rLiLink" href="#" target="_blank" rel="noopener sponsored">보러 가기 ↗</a>
+      </div>
+      <p class="li-notice" id="rLiNotice" hidden></p>
     </article>
 
     <details class="glass card notes">
@@ -154,7 +166,7 @@
 
   <footer class="foot">
     <p>별빛 사주의 풀이는 재미와 참고를 위한 것이에요.<br>중요한 결정은 스스로의 마음을 먼저 믿어 주세요.</p>
-    <p class="copy"><a href="privacy.html">개인정보처리방침·이용 안내</a> · © Starline Labs</p>
+    <p class="copy"><a href="ilju/">60일주 풀이</a> · <a href="privacy.html">개인정보처리방침·이용 안내</a> · © Starline Labs</p>
   </footer>
 </main>
 
@@ -175,10 +187,11 @@
   <p>별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.4.3"></script>
-<script src="js/jie-table.js?v=0.4.3"></script>
-<script src="js/saju-engine.js?v=0.4.3"></script>
-<script src="js/texts.js?v=0.4.3"></script>
-<script src="app.js?v=0.4.3"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.5.0"></script>
+<script src="js/jie-table.js?v=0.5.0"></script>
+<script src="js/saju-engine.js?v=0.5.0"></script>
+<script src="js/texts.js?v=0.5.0"></script>
+<script src="js/lucky-items.js?v=0.5.0"></script>
+<script src="app.js?v=0.5.0"></script>
 </body>
 </html>
