@@ -27,7 +27,7 @@
       ph.style.backgroundImage = '';
       ph.innerHTML = '<img alt="' + it.name.replace(/"/g, '') + '" src="' + it.img + '" loading="lazy"><span class="li-tag">쿠팡</span>';
     } else {
-      ph.style.backgroundImage = 'url(img/' + L.el + '.jpg)';
+      ph.style.display = 'none';
       ph.innerHTML = '<span class="li-tag">' + { wood: '나무', fire: '불', earth: '흙', metal: '쇠', water: '물' }[L.el] + ' 기운</span><span class="li-ph">' + it.q + '</span>';
     }
     var nt = $(pre + 'Notice');
@@ -306,9 +306,11 @@
     // 오늘의 행운 아이템: 행운의 색과 같은 기운에서 날마다 하나 (결과는 절대 막지 않는다)
     var LK = window.SAJU_LUCKY;
     luckyToday = null;
-    if (LK && LK.items[le]) {
-      var list = LK.items[le], it = list[(seed >>> 7) % list.length];
-      var useP = !!(LK.PARTNER.enabled && it.link);
+    // 진짜 파트너스 링크와 상품 사진이 모두 있을 때만 보여 준다 (임시 사진·일반 링크는 절대 공개하지 않음)
+    var ready = LK && LK.PARTNER.enabled && LK.items[le] && LK.items[le].filter(function (x) { return x.link && x.img; });
+    if (ready && ready.length) {
+      var list = ready, it = list[(seed >>> 7) % list.length];
+      var useP = true;
       luckyToday = { it: it, el: le, col: lc.hex, href: useP ? it.link : 'https://www.coupang.com/np/search?q=' + encodeURIComponent(it.q),
         notice: useP ? LK.PARTNER.notice : '', day: td.y + '-' + td.m + '-' + td.d };
       fillLucky('rLi', luckyToday);
