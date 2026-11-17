@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.6.5">
+<link rel="stylesheet" href="style.css?v=0.6.6">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -266,22 +266,46 @@
   </div>
 </div>
 
+<div class="dw" id="deepWait" hidden>
+  <div class="dw-in">
+    <div class="dw-ring" id="dwRing">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="dwGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f39ac2"/></linearGradient></defs>
+        <circle class="dw-track" cx="60" cy="60" r="52"/>
+        <circle class="dw-bar" id="dwBar" cx="60" cy="60" r="52"/>
+      </svg>
+      <div class="dw-num"><b id="dwPct">1</b><small>%</small></div>
+    </div>
+    <p class="dw-step" id="dwStep" aria-live="polite">여덟 글자를 펼치고 있어요</p>
+    <p class="dw-done" id="dwDone" hidden>감정서가 완성되었어요.<br>지금 보시겠어요?</p>
+    <button class="btn-main dw-go" id="dwGo" type="button" hidden>✦ 감정서 보기</button>
+
+    <p class="dw-label">✦ 기다리는 동안 읽어 보세요 · 감정서 읽는 법</p>
+    <div class="dw-cards" id="dwCards"><div class="dw-track2" id="dwTrack"></div></div>
+    <div class="dw-nav">
+      <button type="button" id="dwPrev" aria-label="이전 카드">‹</button>
+      <div class="dw-dots" id="dwDots"></div>
+      <button type="button" id="dwNext" aria-label="다음 카드">›</button>
+    </div>
+  </div>
+</div>
+
 <div class="gather" id="gather" hidden aria-live="polite">
   <canvas id="gatherCanvas"></canvas>
   <p id="gatherText">별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.6.5"></script>
-<script src="js/jie-table.js?v=0.6.5"></script>
-<script src="js/saju-engine.js?v=0.6.5"></script>
-<script src="js/places.js?v=0.6.5"></script>
-<script src="js/texts.js?v=0.6.5"></script>
-<script src="js/lucky-items.js?v=0.6.5"></script>
-<script src="js/saju-analysis.js?v=0.6.5"></script>
-<script src="js/deep-a.js?v=0.6.5"></script>
-<script src="js/deep-b.js?v=0.6.5"></script>
-<script src="js/deep-c.js?v=0.6.5"></script>
-<script src="js/deep-report.js?v=0.6.5"></script>
-<script src="app.js?v=0.6.5"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.6.6"></script>
+<script src="js/jie-table.js?v=0.6.6"></script>
+<script src="js/saju-engine.js?v=0.6.6"></script>
+<script src="js/places.js?v=0.6.6"></script>
+<script src="js/texts.js?v=0.6.6"></script>
+<script src="js/lucky-items.js?v=0.6.6"></script>
+<script src="js/saju-analysis.js?v=0.6.6"></script>
+<script src="js/deep-a.js?v=0.6.6"></script>
+<script src="js/deep-b.js?v=0.6.6"></script>
+<script src="js/deep-c.js?v=0.6.6"></script>
+<script src="js/deep-report.js?v=0.6.6"></script>
+<script src="app.js?v=0.6.6"></script>
 </body>
 </html>

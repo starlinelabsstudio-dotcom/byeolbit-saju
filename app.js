@@ -407,9 +407,84 @@
     chs.forEach(function (c, i) { c.classList.add('reveal'); setTimeout(function () { c.classList.add('in'); }, 200 + i * 120); });
     window.__lastReportChars = rep.chars;
   }
+  // ---------- 감정서 기다림: 동그란 진행률 + 읽는 법 카드 ----------
+  var DW_CARDS = [
+    ['🧭', '사주는 지도예요, 정답이 아니에요', '타고난 기질과 흐름을 보여 줄 뿐, 앞날을 정해 두지 않아요.', '100% 믿기보다 나를 돌아보는 거울로 읽어 주세요.'],
+    ['✍️', '와닿는 말에 밑줄을 그어 보세요', '감정서는 여러 갈래로 풀어요. 모든 문장이 꼭 맞을 수는 없어요.', '맞다 싶은 부분만 챙겨도 충분해요. 아닌 말은 가볍게 넘기세요.'],
+    ['⏰', '태어난 시간이 정확할수록 깊어져요', '시간이 30분만 달라도 시주(태어난 시의 글자)가 바뀔 수 있어요.', '시간을 모르면 여섯 글자로 풀어요. 나중에 알게 되면 다시 넣어 보세요.'],
+    ['☯️', '좋은 운, 나쁜 운은 따로 없어요', '같은 기운도 쓰기에 따라 장점이 되고 단점이 돼요.', '‘조심할 때’라고 적힌 곳은 겁낼 일이 아니라 미리 준비할 일로 읽어 주세요.'],
+    ['🌦️', '대운은 10년마다 바뀌는 날씨예요', '계절이 바뀌듯 바탕이 달라질 뿐이에요.', '비가 오는 해에도 우산을 챙기는 건 나예요. 그 안에서 무엇을 할지는 내가 정해요.'],
+    ['⚖️', '중요한 결정은 사주만으로 하지 마세요', '건강, 돈, 법, 진로처럼 큰 일은 꼭 그 분야 전문가와 상의하세요.', '감정서는 참고용이에요. 결정은 언제나 나의 몫이에요.'],
+    ['🔒', '이 감정서는 이렇게 만들어져요', '만세력 계산과 명리 풀이 규칙에 따라 내 휴대폰 안에서 자동으로 만들어져요.', '적어 주신 생년월일과 이름은 어디에도 보내거나 모아 두지 않아요.'],
+    ['📜', '1년 뒤에 다시 읽어 보세요', '다 읽은 뒤 ‘인쇄’ 버튼으로 종이나 PDF로 남길 수 있어요.', '시간이 지나 다시 읽으면 그때는 다른 문장이 와닿을 거예요.']
+  ];
+  var DW_STEPS = [[0, '여덟 글자를 펼치고 있어요'], [10, '나와 다른 글자의 관계(십신)를 살피는 중'], [24, '내 기운의 세기를 재는 중'], [36, '나에게 필요한 기운을 찾는 중'], [48, '합·충·신살을 맞춰 보는 중'], [58, '10년마다의 흐름(대운)을 그리는 중'], [70, '올해와 내년의 운을 읽는 중'], [80, '일·재물·사랑·건강을 풀어 쓰는 중'], [92, '11장으로 정리하는 중']];
+  var dwState = null, dwMadeFor = '';
+  (function buildCards() {
+    $('dwTrack').innerHTML = DW_CARDS.map(function (c, i) {
+      return '<div class="dw-card"><span class="no">' + (i + 1) + ' / ' + DW_CARDS.length + '</span><div class="ic">' + c[0] + '</div><h4>' + c[1] + '</h4><p>' + c[2] + '</p><p>' + c[3] + '</p></div>';
+    }).join('');
+    $('dwDots').innerHTML = DW_CARDS.map(function () { return '<i></i>'; }).join('');
+  })();
+  function dwShow(i) {
+    if (!dwState) return;
+    var n = DW_CARDS.length; dwState.card = (i + n) % n;
+    $('dwTrack').style.transform = 'translateX(' + (-100 * dwState.card) + '%)';
+    [].forEach.call($('dwDots').children, function (d, k) { d.className = k === dwState.card ? 'on' : ''; });
+    dwState.lastTurn = Date.now();
+  }
+  $('dwPrev').addEventListener('click', function () { dwShow(dwState.card - 1); });
+  $('dwNext').addEventListener('click', function () { dwShow(dwState.card + 1); });
+  (function swipe() {
+    var x0 = null;
+    $('dwCards').addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    $('dwCards').addEventListener('touchend', function (e) {
+      if (x0 == null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 40) dwShow(dwState.card + (dx < 0 ? 1 : -1));
+    });
+  })();
+  function dwSetPct(p) {
+    $('dwPct').textContent = p;
+    $('dwBar').style.strokeDashoffset = (326.73 * (1 - p / 100)).toFixed(2);
+    var step = DW_STEPS[0][1]; DW_STEPS.forEach(function (s) { if (p >= s[0]) step = s[1]; });
+    if ($('dwStep').textContent !== step) $('dwStep').textContent = step;
+  }
+  function deepWait() {
+    var total = window.__DW_MS || 60000; // 약 1분. 그동안 읽는 법 카드를 읽게 한다
+    dwState = { card: 0, t0: Date.now(), lastTurn: Date.now(), done: false };
+    $('dwDone').hidden = true; $('dwGo').hidden = true; $('dwStep').hidden = false;
+    $('dwRing').classList.remove('full');
+    $('deepWait').hidden = false; $('deepWait').scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    dwShow(0); dwSetPct(1);
+    // 단계마다 잠깐 머무르는 진행: 처음은 빠르게, 끝으로 갈수록 천천히
+    var tick = setInterval(function () {
+      var st = dwState; if (!st || st.done) { clearInterval(tick); return; }
+      var x = Math.min(1, (Date.now() - st.t0) / total);
+      var p = Math.max(1, Math.min(100, Math.round(100 * (1 - Math.pow(1 - x, 1.7)))));
+      if (x < 1 && p >= 100) p = 99;
+      dwSetPct(p);
+      if (Date.now() - st.lastTurn > 8000) dwShow(st.card + 1); // 8초마다 다음 카드
+      if (x >= 1) {
+        st.done = true; clearInterval(tick);
+        $('dwStep').hidden = true; $('dwDone').hidden = false; $('dwGo').hidden = false;
+        $('dwRing').classList.add('full'); sfx('reveal');
+        dwMadeFor = JSON.stringify(last.input);
+      }
+    }, 250);
+  }
+  $('dwGo').addEventListener('click', function () {
+    dwState = null; $('deepWait').hidden = true; document.body.style.overflow = '';
+    showReport();
+  });
   $('btnDeep').addEventListener('click', function () {
-    $('gatherText').textContent = '감정서를 펼치고 있어요…';
-    gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showReport(); });
+    if (!last) return;
+    if (dwMadeFor === JSON.stringify(last.input)) { // 이미 만든 감정서는 바로 다시 연다
+      $('gatherText').textContent = '감정서를 펼치고 있어요…';
+      gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showReport(); });
+      return;
+    }
+    sfx('open'); deepWait();
   });
   $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewReport').hidden = true; $('viewResult').hidden = false; $('rDeepCta').scrollIntoView(); });
   $('rpTop').addEventListener('click', function () { scrollTo(0, 0); });

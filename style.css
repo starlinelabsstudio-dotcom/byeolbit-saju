@@ -313,3 +313,35 @@ body.reading .sound-btn { display: none; }
 .place-hint { font-size: 13px; color: var(--ink3); min-height: 18px; }
 .place-hint.city, .place-hint.province, .place-hint.north { color: #9be7b8; }
 .place-hint.none { color: #ffb3b3; }
+
+/* ---------- 감정서 기다림 화면 (동그란 진행률 + 읽는 법 카드) ---------- */
+.dw { position: fixed; inset: 0; z-index: 11; overflow-y: auto; background: radial-gradient(ellipse at 50% 20%, #241650 0%, var(--bg0) 70%); animation: fadeIn .4s; }
+.dw-in { max-width: 460px; margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; }
+.dw-ring { position: relative; width: 168px; height: 168px; margin-top: 8px; }
+.dw-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dw-track { fill: none; stroke: rgba(255, 255, 255, .1); stroke-width: 7; }
+.dw-bar { fill: none; stroke: url(#dwGrad); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 326.73; stroke-dashoffset: 326.73; transition: stroke-dashoffset .5s ease; filter: drop-shadow(0 0 6px rgba(255, 224, 138, .55)); }
+.dw-num { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; padding-top: 58px; color: var(--gold); font-family: var(--serif); }
+.dw-num b { font-size: 46px; font-weight: 700; line-height: 1; }
+.dw-num small { font-size: 18px; margin-left: 2px; }
+.dw-ring.full { animation: dwGlow 1.6s ease-in-out infinite; border-radius: 50%; }
+@keyframes dwGlow { 50% { box-shadow: 0 0 40px 6px rgba(255, 224, 138, .35); } }
+.dw-step { margin-top: 14px; min-height: 26px; color: var(--ink2); font-size: 16px; text-align: center; }
+.dw-step::after { content: ''; animation: dwDots 1.4s steps(4) infinite; }
+@keyframes dwDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+.dw-done { margin-top: 14px; font-family: var(--serif); color: var(--gold); font-size: 20px; text-align: center; line-height: 1.5; animation: fadeIn .5s; }
+.dw-go { margin-top: 16px; animation: fadeIn .5s; }
+.dw-label { align-self: flex-start; margin: 26px 0 10px; color: var(--gold2); font-size: 14px; letter-spacing: .02em; }
+.dw-cards { width: 100%; overflow: hidden; border-radius: 20px; touch-action: pan-y; }
+.dw-track2 { display: flex; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.dw-card { flex: 0 0 100%; min-height: 250px; padding: 24px 22px 22px; border-radius: 20px; border: 1px solid var(--glass-b); background: linear-gradient(160deg, rgba(255, 255, 255, .11), rgba(255, 255, 255, .04)); display: flex; flex-direction: column; }
+.dw-card .no { color: var(--ink3); font-size: 13px; }
+.dw-card .ic { font-size: 34px; margin: 6px 0 4px; }
+.dw-card h4 { font-family: var(--serif); color: var(--gold); font-size: 21px; line-height: 1.4; margin-bottom: 10px; word-break: keep-all; }
+.dw-card p { color: var(--ink); font-size: 16px; line-height: 1.75; word-break: keep-all; }
+.dw-card p + p { margin-top: 8px; color: var(--ink2); font-size: 15px; }
+.dw-nav { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.dw-nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--glass-b); background: var(--glass); font-size: 24px; line-height: 1; cursor: pointer; }
+.dw-dots { display: flex; gap: 7px; }
+.dw-dots i { width: 8px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .25); transition: all .3s; }
+.dw-dots i.on { width: 22px; background: var(--gold); }
