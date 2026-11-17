@@ -163,16 +163,23 @@ button, input, select { font: inherit; color: inherit; }
 .lucky span { display: block; font-size: 12px; color: var(--ink3); }
 .lucky b { font-size: 17px; display: inline-flex; align-items: center; gap: 6px; }
 .lucky i { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
-.lucky-item { display: grid; grid-template-columns: 52px 1fr; gap: 4px 12px; align-items: center; margin-top: 10px; padding: 12px; border-radius: 14px;
-  background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 230, 160, .3); }
-.li-icon { grid-row: span 2; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 24px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6);
-  box-shadow: 0 0 18px var(--li-col, #ffe08a); background: var(--li-col, #ffe08a); }
-.li-body span { display: block; font-size: 12px; color: var(--ink3); }
-.li-body b { display: block; font-size: 16px; word-break: keep-all; }
-.li-body p { font-size: 13px !important; color: var(--ink2); word-break: keep-all; }
-.li-btn { grid-column: 2; justify-self: start; margin-top: 4px; padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 700; text-decoration: none;
-  color: #2a1440; background: linear-gradient(90deg, var(--gold2), var(--pink)); }
-.li-notice { margin-top: 8px; font-size: 11px !important; color: var(--ink3); }
+.lucky-card h3 { color: var(--gold); margin: 10px 0 2px; }
+.li-photo { display: block; position: relative; aspect-ratio: 1 / 1; max-height: 300px; width: 100%; margin-top: 8px; border-radius: 16px; overflow: hidden;
+  background: rgba(0, 0, 0, .25) center/cover; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15), 0 0 26px var(--li-col, rgba(255, 224, 138, .3)); }
+.li-photo img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.li-photo .li-tag { position: absolute; left: 10px; top: 10px; padding: 3px 10px; border-radius: 99px; font-size: 12px; color: #2a1440; background: var(--gold); }
+.li-photo .li-ph { position: absolute; inset: auto 0 0 0; padding: 30px 12px 10px; font-size: 12px; color: var(--ink2); background: linear-gradient(transparent, rgba(18, 10, 46, .9)); }
+.li-go { display: block; text-align: center; line-height: 50px; height: 50px; margin-top: 12px; text-decoration: none; }
+.li-notice { margin-top: 8px; font-size: 11px !important; color: var(--ink3); line-height: 1.5; }
+.donate { background: linear-gradient(135deg, rgba(255, 224, 138, .14), rgba(243, 154, 194, .12)); }
+.donate h3 { color: var(--gold); }
+.donate-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.donate-btns a { display: grid; place-items: center; text-decoration: none; font-size: 14px; }
+.lucky-pop { position: relative; padding: 22px 18px 16px; border-radius: 22px; background: linear-gradient(160deg, #241552, #120a2e); border: 1px solid rgba(255, 230, 160, .4); }
+.lucky-pop h3 { font-family: var(--serif); font-size: 20px; color: var(--gold); }
+.lucky-pop p { font-size: 14px; color: var(--ink2); }
+.lucky-pop .li-photo { max-height: 260px; }
+.pop-x { position: absolute; right: 10px; top: 10px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--glass-b); background: rgba(255, 255, 255, .1); cursor: pointer; font-size: 18px; }
 .notes summary { cursor: pointer; font-size: 14px; color: var(--ink3); }
 .notes ul { margin: 8px 0 0 18px; font-size: 13px; color: var(--ink2); }
 .actions { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 20px; }

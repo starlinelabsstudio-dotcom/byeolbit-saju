@@ -14,6 +14,38 @@
     ['제주', 126.53], ['잘 모름 (서울로 계산)', 126.98]
   ];
   var STORE_KEY = 'byeolbit-saju-last';
+  var POP_KEY = 'byeolbit-saju-lucky-day';
+  var luckyToday = null;
+  function fillLucky(pre, L) {
+    var it = L.it, ph = $(pre + 'Photo');
+    $(pre + 'Name').textContent = it.name;
+    $(pre + 'Why').textContent = it.why;
+    $(pre + 'Link').href = L.href;
+    ph.href = L.href;
+    ph.style.setProperty('--li-col', L.col);
+    if (it.img) {
+      ph.style.backgroundImage = '';
+      ph.innerHTML = '<img alt="' + it.name.replace(/"/g, '') + '" src="' + it.img + '" loading="lazy"><span class="li-tag">쿠팡</span>';
+    } else {
+      ph.style.backgroundImage = 'url(img/' + L.el + '.jpg)';
+      ph.innerHTML = '<span class="li-tag">' + { wood: '나무', fire: '불', earth: '흙', metal: '쇠', water: '물' }[L.el] + ' 기운</span><span class="li-ph">' + it.q + '</span>';
+    }
+    var nt = $(pre + 'Notice');
+    nt.textContent = L.notice; nt.hidden = !L.notice;
+  }
+  function maybeLuckyPopup() {
+    var LK = window.SAJU_LUCKY;
+    if (!LK || !LK.PARTNER.popup || !LK.PARTNER.enabled || !luckyToday || !luckyToday.notice) return; // 파트너스 링크가 있을 때만
+    var seen = null;
+    try { seen = localStorage.getItem(POP_KEY); } catch (e) { }
+    if (seen === luckyToday.day) return; // 하루 한 번만
+    try { localStorage.setItem(POP_KEY, luckyToday.day); } catch (e) { }
+    fillLucky('lp', luckyToday);
+    $('luckyModal').hidden = false;
+    sfx('open');
+    $('lpSkip').focus();
+  }
+  function closeLucky() { $('luckyModal').hidden = true; }
   var SLUG_S = ['gap', 'eul', 'byeong', 'jeong', 'mu', 'gi', 'gyeong', 'sin', 'im', 'gye'];
   var SLUG_B = ['ja', 'chuk', 'in', 'myo', 'jin', 'sa', 'o', 'mi', 'sin', 'yu', 'sul', 'hae'];
 
@@ -270,22 +302,27 @@
     var lc = (T.luckyColor || {})[le] || { name: FALLBACK_COLOR[le][0], hex: FALLBACK_COLOR[le][1] };
     $('rLuckyColor').innerHTML = '<i style="background:' + lc.hex + ';color:' + lc.hex + '"></i>' + lc.name;
     $('rLuckyNum').textContent = (seed >>> 3) % 9 + 1;
-    // 오늘의 행운 아이템: 행운의 색과 같은 기운에서 날마다 하나
+    // 오늘의 행운 아이템: 행운의 색과 같은 기운에서 날마다 하나 (결과는 절대 막지 않는다)
     var LK = window.SAJU_LUCKY;
+    luckyToday = null;
     if (LK && LK.items[le]) {
       var list = LK.items[le], it = list[(seed >>> 7) % list.length];
-      var useP = LK.PARTNER.enabled && it.link;
-      $('rLiName').textContent = it.name;
-      $('rLiWhy').textContent = it.why;
-      $('rLiIcon').textContent = { wood: '木', fire: '火', earth: '土', metal: '金', water: '水' }[le];
-      $('rLiIcon').style.fontFamily = 'var(--hanja)';
+      var useP = !!(LK.PARTNER.enabled && it.link);
+      luckyToday = { it: it, el: le, col: lc.hex, href: useP ? it.link : 'https://www.coupang.com/np/search?q=' + encodeURIComponent(it.q),
+        notice: useP ? LK.PARTNER.notice : '', day: td.y + '-' + td.m + '-' + td.d };
+      fillLucky('rLi', luckyToday);
       $('rLuckyItem').style.setProperty('--li-col', lc.hex);
-      $('rLiLink').href = useP ? it.link : 'https://www.coupang.com/np/search?q=' + encodeURIComponent(it.q);
-      $('rLiLink').textContent = '쿠팡에서 보기 ↗';
-      $('rLiNotice').hidden = !useP;
-      $('rLiNotice').textContent = useP ? LK.PARTNER.notice : '';
       $('rLuckyItem').hidden = false;
     } else { $('rLuckyItem').hidden = true; }
+
+    // 후원(마음 보내기)
+    var DN = LK && LK.DONATE;
+    var donOn = !!(DN && DN.enabled && (DN.toss || DN.kakao));
+    $('rDonate').hidden = !donOn;
+    if (donOn) {
+      $('rDonToss').hidden = !DN.toss; $('rDonToss').href = DN.toss || '#';
+      $('rDonKakao').hidden = !DN.kakao; $('rDonKakao').href = DN.kakao || '#';
+    }
 
     $('rNotes').innerHTML = r.notes.map(function (n) { return '<li>' + n + '</li>'; }).join('') +
       '<li>이달의 기준 절기: ' + r.monthTerm.name + '</li>';
@@ -295,6 +332,7 @@
     // 아래 카드들 차례로 등장
     var cards = document.querySelectorAll('#viewResult .glass, #viewResult .actions');
     cards.forEach(function (c, i) { c.classList.add('reveal'); c.classList.remove('in'); setTimeout(function () { c.classList.add('in'); }, 1300 + i * 140); });
+    setTimeout(maybeLuckyPopup, 4200);
   }
 
   function goInput(clear) {
@@ -400,6 +438,10 @@
     var file = new File([cardBlob], 'byeolbit-saju.png', { type: 'image/png' });
     navigator.share({ files: [file], title: '별빛 사주', text: '내 별자리 사주 카드야 ✦ ' + location.origin + location.pathname }).catch(function () { });
   });
+  $('lpClose').addEventListener('click', closeLucky);
+  $('lpSkip').addEventListener('click', closeLucky);
+  $('luckyModal').addEventListener('click', function (e) { if (e.target === this) closeLucky(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeLucky(); $('cardModal').hidden = true; } });
   $('cardClose').addEventListener('click', function () { $('cardModal').hidden = true; });
   $('cardModal').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
 

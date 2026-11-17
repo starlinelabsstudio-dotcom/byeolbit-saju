@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.5.0">
+<link rel="stylesheet" href="style.css?v=0.5.1">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -140,16 +140,26 @@
         <div><span>행운의 색</span><b id="rLuckyColor"></b></div>
         <div><span>행운의 숫자</span><b id="rLuckyNum"></b></div>
       </div>
-      <div class="lucky-item" id="rLuckyItem">
-        <div class="li-icon" id="rLiIcon">✦</div>
-        <div class="li-body">
-          <span>오늘의 행운 아이템</span>
-          <b id="rLiName"></b>
-          <p id="rLiWhy"></p>
-        </div>
-        <a class="li-btn" id="rLiLink" href="#" target="_blank" rel="noopener sponsored">보러 가기 ↗</a>
-      </div>
+    </article>
+
+    <article class="glass card lucky-card" id="rLuckyItem">
+      <p class="card-k">오늘의 행운 아이템</p>
+      <a class="li-photo" id="rLiPhoto" href="#" target="_blank" rel="noopener sponsored" aria-label="행운 아이템 쿠팡에서 보기"></a>
+      <h3 id="rLiName"></h3>
+      <p id="rLiWhy"></p>
+      <a class="btn-main li-go" id="rLiLink" href="#" target="_blank" rel="noopener sponsored">쿠팡에서 보기 ↗</a>
       <p class="li-notice" id="rLiNotice" hidden></p>
+    </article>
+
+    <article class="glass card donate" id="rDonate" hidden>
+      <p class="card-k">✦ 별빛이 마음에 닿았다면</p>
+      <h3>커피 한 잔으로 응원해 주세요</h3>
+      <p>별빛 사주는 모두 무료예요. 도움이 되셨다면 마음만큼 보내 주세요.<br>보내지 않아도 모든 풀이는 그대로예요.</p>
+      <div class="donate-btns">
+        <a class="btn-sub" id="rDonToss" href="#" target="_blank" rel="noopener">토스로 보내기</a>
+        <a class="btn-sub" id="rDonKakao" href="#" target="_blank" rel="noopener">카카오페이로 보내기</a>
+      </div>
+      <p class="li-notice">보내 주신 마음은 사이트 운영과 새 풀이를 만드는 데 써요. 받은 금액에 따라 풀이가 달라지지 않아요.</p>
     </article>
 
     <details class="glass card notes">
@@ -170,6 +180,19 @@
   </footer>
 </main>
 
+<div class="modal" id="luckyModal" hidden role="dialog" aria-modal="true" aria-label="오늘의 행운 아이템">
+  <div class="modal-box lucky-pop">
+    <button class="pop-x" id="lpClose" type="button" aria-label="닫기">✕</button>
+    <p class="pill">✦ 오늘 나에게 온 행운 아이템</p>
+    <a class="li-photo" id="lpPhoto" href="#" target="_blank" rel="noopener sponsored" aria-label="행운 아이템 쿠팡에서 보기"></a>
+    <h3 id="lpName"></h3>
+    <p id="lpWhy"></p>
+    <a class="btn-main li-go" id="lpLink" href="#" target="_blank" rel="noopener sponsored">쿠팡에서 보기 ↗</a>
+    <button class="btn-sub" id="lpSkip" type="button">닫고 결과 계속 보기</button>
+    <p class="li-notice" id="lpNotice"></p>
+  </div>
+</div>
+
 <div class="modal" id="cardModal" hidden role="dialog" aria-modal="true" aria-label="별빛 카드">
   <div class="modal-box">
     <img id="cardImg" alt="나의 별빛 사주 카드">
@@ -187,11 +210,11 @@
   <p>별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.5.0"></script>
-<script src="js/jie-table.js?v=0.5.0"></script>
-<script src="js/saju-engine.js?v=0.5.0"></script>
-<script src="js/texts.js?v=0.5.0"></script>
-<script src="js/lucky-items.js?v=0.5.0"></script>
-<script src="app.js?v=0.5.0"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.5.1"></script>
+<script src="js/jie-table.js?v=0.5.1"></script>
+<script src="js/saju-engine.js?v=0.5.1"></script>
+<script src="js/texts.js?v=0.5.1"></script>
+<script src="js/lucky-items.js?v=0.5.1"></script>
+<script src="app.js?v=0.5.1"></script>
 </body>
 </html>
