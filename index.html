@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>별빛 사주 — 별이 읽어주는 나의 사주</title>
+<meta name="description" content="생년월일시만 넣으면 사주 8글자, 다섯 기운, 일주 풀이, 오늘의 운세를 무료로 보여드려요. 가입 없이, 정보는 내 휴대폰 안에서만 계산해요.">
+<meta name="theme-color" content="#120a2e">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="별빛 사주 — 별이 읽어주는 나의 사주">
+<meta property="og:description" content="생년월일시만 넣으면 사주 8글자, 다섯 기운, 오늘의 운세를 무료로. 가입 없이 바로 봐요.">
+<meta property="og:image" content="https://starlinelabsstudio-dotcom.github.io/byeolbit-saju/og.jpg">
+<meta property="og:url" content="https://starlinelabsstudio-dotcom.github.io/byeolbit-saju/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=0.4.2">
+</head>
+<body>
+<div class="sky" aria-hidden="true">
+  <div class="sky-photo"></div>
+  <canvas id="stars"></canvas>
+  <div class="moon"></div>
+</div>
+
+<main class="wrap">
+  <header class="top">
+    <a class="logo" href="#" id="homeLink"><span class="logo-star">✦</span> 별빛 사주</a>
+  </header>
+
+  <!-- 입력 -->
+  <section id="viewInput" class="view">
+    <div class="intro">
+      <p class="pill">✦ 가입 없이 바로 · 무료</p>
+      <h1>별이 읽어주는<br><em>나의 사주</em></h1>
+      <p class="lead">태어난 날의 하늘을 펼쳐<br>나만의 여덟 글자를 찾아드려요</p>
+    </div>
+
+    <form id="form" class="glass form" novalidate>
+      <label class="field">
+        <span>이름 또는 별명</span>
+        <input id="fName" type="text" maxlength="12" placeholder="하늘이" autocomplete="off">
+      </label>
+
+      <div class="field">
+        <span>성별</span>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="gender" value="F" checked><b>여자</b></label>
+          <label><input type="radio" name="gender" value="M"><b>남자</b></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span>생일</span>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="cal" value="solar" checked><b>양력</b></label>
+          <label><input type="radio" name="cal" value="lunar"><b>음력</b></label>
+        </div>
+        <div class="row3">
+          <select id="fYear" aria-label="태어난 해"></select>
+          <select id="fMonth" aria-label="태어난 달"></select>
+          <select id="fDay" aria-label="태어난 날"></select>
+        </div>
+        <label class="check" id="leapWrap" hidden><input type="checkbox" id="fLeap"> 윤달이에요</label>
+      </div>
+
+      <div class="field">
+        <span>태어난 시간</span>
+        <div class="row2">
+          <select id="fHour" aria-label="태어난 시"></select>
+          <select id="fMin" aria-label="태어난 분"></select>
+        </div>
+        <label class="check"><input type="checkbox" id="fNoTime"> 시간을 몰라요</label>
+      </div>
+
+      <label class="field">
+        <span>태어난 곳 <small>(시간 보정에 써요)</small></span>
+        <select id="fPlace"></select>
+      </label>
+
+      <details class="more">
+        <summary>자세한 설정</summary>
+        <label class="field">
+          <span>밤 11시~자정 사이 출생 계산</span>
+          <select id="fJasi">
+            <option value="jojasi">다음 날로 보기 (기본)</option>
+            <option value="yajasi">그날로 보기 (야자시)</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="fNoCorr"> 지역 시간 보정 끄기</label>
+      </details>
+
+      <p class="err" id="formErr" role="alert"></p>
+      <button class="btn-main" type="submit">✦ 내 사주 보기</button>
+      <p class="privacy">입력한 정보는 이 휴대폰 안에서만 계산해요. 어디에도 보내지 않아요.</p>
+    </form>
+  </section>
+
+  <!-- 결과 -->
+  <section id="viewResult" class="view" hidden>
+    <div class="res-head">
+      <p class="pill">✦ 별빛이 읽은 나의 사주</p>
+      <h2 id="rTitle">하늘이님의 별자리 사주</h2>
+      <p class="res-sub" id="rSub"></p>
+    </div>
+
+    <div class="pillars" id="rPillars"></div>
+
+    <article class="glass hero" id="rHero">
+      <div class="hero-art" id="rHeroArt"></div>
+      <div class="hero-body">
+        <p class="hero-k">나를 나타내는 글자</p>
+        <h3 id="rDmTitle"></h3>
+        <p id="rDmText"></p>
+        <div class="chips" id="rDmChips"></div>
+      </div>
+    </article>
+
+    <article class="glass card">
+      <h3>✧ 나의 다섯 기운</h3>
+      <div class="bars" id="rBars"></div>
+      <div id="rElemText" class="elem-text"></div>
+    </article>
+
+    <article class="glass card">
+      <p class="card-k">나의 일주</p>
+      <h3 id="rIljuTitle"></h3>
+      <div class="ilju" id="rIlju"></div>
+    </article>
+
+    <article class="glass card today">
+      <p class="card-k" id="rTodayDate"></p>
+      <h3 id="rTodayTitle">☾ 오늘의 운세</h3>
+      <p id="rTodayText"></p>
+      <div class="lucky">
+        <div><span>행운의 색</span><b id="rLuckyColor"></b></div>
+        <div><span>행운의 숫자</span><b id="rLuckyNum"></b></div>
+      </div>
+    </article>
+
+    <details class="glass card notes">
+      <summary>계산 메모</summary>
+      <ul id="rNotes"></ul>
+    </details>
+
+    <div class="actions">
+      <button class="btn-main" id="btnFriend" type="button">✦ 친구 사주도 보기</button>
+      <button class="btn-sub" id="btnCard" type="button">✧ 별빛 카드 만들기</button>
+      <button class="btn-sub" id="btnAgain" type="button">처음으로</button>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>별빛 사주의 풀이는 재미와 참고를 위한 것이에요.<br>중요한 결정은 스스로의 마음을 먼저 믿어 주세요.</p>
+    <p class="copy"><a href="privacy.html">개인정보처리방침·이용 안내</a> · © Starline Labs</p>
+  </footer>
+</main>
+
+<div class="modal" id="cardModal" hidden role="dialog" aria-modal="true" aria-label="별빛 카드">
+  <div class="modal-box">
+    <img id="cardImg" alt="나의 별빛 사주 카드">
+    <div class="modal-btns">
+      <button class="btn-main" id="cardSave" type="button">✦ 사진으로 저장</button>
+      <button class="btn-sub" id="cardShare" type="button" hidden>친구에게 공유</button>
+      <button class="btn-sub" id="cardClose" type="button">닫기</button>
+    </div>
+    <p class="modal-tip" id="cardTip"></p>
+  </div>
+</div>
+
+<div class="gather" id="gather" hidden aria-live="polite">
+  <canvas id="gatherCanvas"></canvas>
+  <p>별을 모으고 있어요…</p>
+</div>
+
+<script src="js/korean-lunar-calendar.min.js?v=0.4.2"></script>
+<script src="js/jie-table.js?v=0.4.2"></script>
+<script src="js/saju-engine.js?v=0.4.2"></script>
+<script src="js/texts.js?v=0.4.2"></script>
+<script src="app.js?v=0.4.2"></script>
+</body>
+</html>
