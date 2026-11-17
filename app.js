@@ -198,8 +198,7 @@
   var FALLBACK_COLOR = { wood: ['초록', '#5fe0a0'], fire: ['다홍', '#ff7b7b'], earth: ['노랑', '#f2c45a'], metal: ['은색', '#e3e9f5'], water: ['하늘색', '#6fb6ff'] };
 
   function showResult(input, r) {
-    var name = input.name || '당신';
-    $('rTitle').textContent = name + '님의 별자리 사주';
+    $('rTitle').textContent = input.name ? input.name + '님의 별자리 사주' : '나의 별자리 사주';
     var when = input.year + '년 ' + input.month + '월 ' + input.day + '일' + (input.calendar === 'lunar' ? ' (음력' + (input.leap ? ' 윤달' : '') + ')' : '');
     if (input.hour != null) when += ' ' + (input.hour < 12 ? '오전 ' : '오후 ') + (input.hour % 12 || 12) + '시 ' + input.minute + '분';
     $('rSub').textContent = when + ' · ' + r.animal + '띠';
@@ -322,7 +321,7 @@
       // 머리
       g.textAlign = 'center';
       g.fillStyle = '#ffe08a'; g.font = '700 38px "Gowun Batang"'; g.fillText('✦ 별빛 사주', W / 2, 92);
-      g.fillStyle = '#f3ecff'; g.font = '700 62px "Gowun Batang"'; g.fillText((input.name || '나') + '의 별자리 사주', W / 2, 180);
+      g.fillStyle = '#f3ecff'; g.font = '700 62px "Gowun Batang"'; g.fillText((input.name ? input.name + '님의' : '나의') + ' 별자리 사주', W / 2, 180);
       g.fillStyle = '#c9bfe6'; g.font = '34px "Gowun Dodum"'; g.fillText(r.animal + '띠 · ' + r.pillars.day.ko + '일주', W / 2, 232);
       // 여덟 글자
       var keys = ['hour', 'day', 'month', 'year'], labs = ['시', '일', '월', '년'], bw = 200, gap = 26, x0 = (W - (bw * 4 + gap * 3)) / 2, y0 = 278, bh = 300;
