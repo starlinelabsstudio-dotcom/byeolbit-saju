@@ -18,6 +18,8 @@
   function bat(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c % 28 !== 0; }
   function josa(w, a, b) { return w + (bat(w) ? a : b); }
   function godLabel(k) { var t = g(D.tenGod, k); return t ? t.name + '(' + t.easy + ')' : k; }
+  // 이름(괄호 앞 글자)의 받침으로 조사를 고른다: godJ('jeongjae', '이에요', '예요') → '정재(…)예요'
+  function godJ(k, a, b) { var t = g(D.tenGod, k); return godLabel(k) + (t && bat(t.name) ? a : b); }
   function P(text, cls) { return text ? { p: text, cls: cls || '' } : null; }
   function H(text) { return { h: text }; }
   function clean(arr) { return arr.filter(function (x) { return x; }); }
@@ -35,7 +37,7 @@
 
     // ---------- 0. 한눈에 ----------
     var summary = clean([
-      dmT.title ? '나를 나타내는 글자는 ' + r.pillars.day.stemKo + '(' + dmS + '), ‘' + dmT.title + '’예요.' : null,
+      dmT.title ? '나를 나타내는 글자는 ' + r.pillars.day.stemKo + '(' + dmS + '), ‘' + dmT.title + '’' + (bat(dmT.title) ? '이에요.' : '예요.') : null,
       season.title ? '태어난 달은 ‘' + season.title + '’의 기운이에요.' : null,
       '사주에서 가장 센 기운은 ' + GROUP_KO[dom] + '이에요.',
       st.title ? '내 힘은 ‘' + st.title + '’ 쪽이에요.' : null,
@@ -61,7 +63,7 @@
     if (monthGod) {
       var mg = g(D.tenGod, monthGod.god) || {};
       pb.push(H('사회에서 보여 주는 얼굴 — ' + mg.name));
-      pb.push(P('태어난 달의 아래 글자 ' + monthGod.char + '(' + monthGod.charKo + ')는 ' + nameJ + '에게 ' + godLabel(monthGod.god) + '이에요. 태어난 달은 사주에서 가장 힘이 센 자리라, 이 기운이 ' + nameJ + '의 바탕 성격과 일하는 방식을 크게 만들어요.'));
+      pb.push(P('태어난 달의 아래 글자 ' + monthGod.char + '(' + monthGod.charKo + ')는 ' + nameJ + '에게 ' + godJ(monthGod.god, '이에요', '예요') + '. 태어난 달은 사주에서 가장 힘이 센 자리라, 이 기운이 ' + nameJ + '의 바탕 성격과 일하는 방식을 크게 만들어요.'));
       pb.push(P(mg.strong));
     }
     godsSorted.slice(0, 3).forEach(function (k) {
@@ -102,7 +104,8 @@
     if (gc.bigeop >= 3) mk.push('manyBigeop');
     if (gc.gwanseong >= 1 && gc.jaeseong >= 1 && mk.length < 3) mk.push('steadyGwan');
     if (gc.inseong >= 3) mk.push('manyInseong');
-    if (!mk.length) mk.push('balanced');
+    // 재물 장이 너무 짧지 않게: 두 문단은 되도록
+    if (mk.length < 2 && mk.indexOf('balanced') < 0) mk.push('balanced');
     var mb = [P('사주에서 재물은 ‘' + GROUP_KO.jaeseong + '’으로 봐요. ' + nameJ + '의 여덟 글자에는 이 기운이 ' + (gc.jaeseong ? gc.jaeseong + '개' : '하나도 없') + (gc.jaeseong ? ' 있어요.' : '어요.'))];
     mk.slice(0, 3).forEach(function (k) { mb.push(P(g(D.money, k))); });
     chapters.push({ id: 'money', title: '재물', sub: '돈을 버는 방식과 모으는 습관', blocks: clean(mb) });
@@ -110,13 +113,19 @@
     // ---------- 5. 연애·결혼 ----------
     var lb = [];
     if (dayGod) {
-      lb.push(P('태어난 날의 아래 글자는 ‘배우자 자리’예요. ' + nameJ + '의 배우자 자리에는 ' + dayGod.char + '(' + dayGod.charKo + '), ' + godLabel(dayGod.god) + '이 앉아 있어요.'));
+      lb.push(P('태어난 날의 아래 글자는 ‘배우자 자리’예요. ' + nameJ + '의 배우자 자리에는 ' + dayGod.char + '(' + dayGod.charKo + '), ' + godJ(dayGod.god, '이', '가') + ' 앉아 있어요.'));
       lb.push(P(g(D.love, dayGod.god)));
     }
     lb.push(H('나에게 짝이 되는 기운'));
     lb.push(P(g(D.partnerStar, a.partner.state)));
     var dayInter = a.interactions.filter(function (x) { return x.withDay && (x.type === 'branchClash' || x.type === 'branchCombine'); });
-    dayInter.forEach(function (x) { lb.push(P(g(D.loveExtra, x.type === 'branchClash' ? 'dayClash' : 'dayCombine'))); });
+    // 부딪침·합이 여러 번이어도 같은 글은 한 번만
+    var loveSeen = {};
+    dayInter.forEach(function (x) {
+      var k = x.type === 'branchClash' ? 'dayClash' : 'dayCombine';
+      if (loveSeen[k]) return; loveSeen[k] = 1;
+      lb.push(P(g(D.loveExtra, k)));
+    });
     if (a.sinsal.some(function (s) { return s.key === 'dohwa'; })) lb.push(P(g(D.loveExtra, 'dohwa')));
     var dun = a.unseong.dB, un = dun && g(D.unseong, dun.key);
     if (un) { lb.push(H('배우자 자리의 힘 — ' + un.name)); lb.push(P(un.text)); }
@@ -138,7 +147,7 @@
     var seenType = {};
     inters.forEach(function (x) {
       var t = g(D.interactions, x.type); if (!t) return;
-      var where = x.a && x.b ? x.a[1] + '와 ' + x.b[1] + '의 글자 ' + x.chars : '글자 ' + x.chars;
+      var where = x.a && x.b ? josa(x.a[1].replace(/\(.*\)$/, ''), '과', '와') + ' ' + x.b[1] + '의 글자 ' + x.chars : '글자 ' + x.chars;
       sb.push(H(t.title + ' — ' + x.chars));
       sb.push(P(where + (x.becomes ? ', 함께 ' + x.becomes + ' 기운을 만들어요.' : '.') + (seenType[x.type] ? '' : ' ' + t.text)));
       seenType[x.type] = 1;
@@ -162,7 +171,8 @@
     chapters.push({ id: 'care', title: '마음과 몸 돌보기', sub: '넘치는 기운과 비어 있는 기운', blocks: clean(cb) });
 
     // ---------- 9. 인생 흐름 (대운) ----------
-    var db = [P(nameJ + '의 큰 운은 ' + (a.daeun.startAge) + '세' + (a.daeun.startAgeMonths ? ' ' + a.daeun.startAgeMonths + '개월' : '') + '부터 10년마다 바뀌어요. ' + (a.daeun.forward ? '태어난 달에서 앞으로' : '태어난 달에서 뒤로') + ' 흘러가는 사주예요.')];
+    var startTxt = a.daeun.startAge === 0 ? '태어나서 ' + Math.max(1, a.daeun.startAgeMonths) + '개월 무렵' : a.daeun.startAge + '세' + (a.daeun.startAgeMonths ? ' ' + a.daeun.startAgeMonths + '개월' : '');
+    var db = [P(nameJ + '의 큰 운은 ' + startTxt + '부터 10년마다 바뀌어요. ' + (a.daeun.forward ? '태어난 달에서 앞으로' : '태어난 달에서 뒤로') + ' 흘러가는 사주예요.')];
     db.push({ timeline: a.daeun.list.slice(0, 9).map(function (d) {
       var t = g(D.daeun, d.god) || {};
       return { age: Math.floor(d.fromAge) + '~' + Math.floor(d.toAge) + '세', year: d.fromYear + '년~', pillar: d.pillar.hanja, ko: d.pillar.ko, title: t.title || '', current: d.current, el: d.pillar.stemElement };
@@ -174,7 +184,8 @@
       var t = g(D.daeun, d.god) || {};
       db.push(H((i === 0 ? '지금 걷고 있는 10년' : '다음에 올 10년') + ' — ' + Math.floor(d.fromAge) + '~' + Math.floor(d.toAge) + '세, ' + d.pillar.ko + '(' + d.pillar.hanja + ')'));
       db.push(P(t.text));
-      db.push(P(g(D.daeunGround, d.groundGroup)));
+      if (i === 0 || !cur || d.groundGroup !== cur.groundGroup) db.push(P(g(D.daeunGround, d.groundGroup)));
+      else db.push(P('바탕에 흐르는 기운은 지금 10년과 같아서, 지금 쌓아 둔 힘이 그대로 이어져요.'));
     });
     chapters.push({ id: 'daeun', title: '인생의 큰 흐름 (대운)', sub: '10년마다 바뀌는 바람', blocks: clean(db) });
 
@@ -183,7 +194,7 @@
     a.years.forEach(function (y) {
       var t = g(D.yearLuck, y.god) || {};
       yb.push(H(y.year + '년 ' + y.pillar.ko + '(' + y.pillar.hanja + ') — ' + (t.title || '')));
-      yb.push(P(y.pillar.ko + '년의 위 글자는 ' + nameJ + '에게 ' + godLabel(y.god) + '이에요.'));
+      yb.push(P(y.pillar.ko + '년의 위 글자는 ' + nameJ + '에게 ' + godJ(y.god, '이에요', '예요') + '.'));
       yb.push(P(t.text));
       y.extra.forEach(function (k) { yb.push(P(g(D.yearExtra, k))); });
       if (t.tips) yb.push({ list: t.tips, label: y.year + '년에 해 보면 좋은 것' });

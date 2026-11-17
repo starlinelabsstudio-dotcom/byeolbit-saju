@@ -217,7 +217,9 @@
       if (p.branch === db) extra.push('sameAsDay');
       return { year: y, pillar: p, god: godOf(me, p.stem), groundGroup: groupOfElement(meEl, BE[p.branch]), extra: extra };
     }
+    // 사주에서 해는 입춘에 바뀐다: 1월~입춘 전이면 아직 지난해
     var thisYear = new Date(now + 9 * 3600000).getUTCFullYear();
+    try { var ipc = E.jieList(thisYear).filter(function (j) { return j.name === '立春'; })[0]; if (ipc && now < ipc.ms) thisYear -= 1; } catch (e) { }
 
     // 짝이 되는 기운 (남: 재성, 여: 관성)
     var partnerGroup = gender === 'M' ? 'jaeseong' : 'gwanseong';
