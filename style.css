@@ -173,10 +173,19 @@ button, input, select { font: inherit; color: inherit; }
 .ad-tag { display: inline-block; padding: 1px 8px; margin-right: 4px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #2a1440; background: #ffe08a; vertical-align: 1px; }
 .ad-notice { margin: 6px 0 2px; padding: 8px 10px; border-radius: 10px; font-size: 13px !important; line-height: 1.5; color: #ffe7a6 !important; background: rgba(255, 224, 138, .12); border: 1px solid rgba(255, 224, 138, .35); word-break: keep-all; }
 .li-notice { margin-top: 8px; font-size: 11px !important; color: var(--ink3); line-height: 1.5; }
-.donate { background: linear-gradient(135deg, rgba(255, 224, 138, .14), rgba(243, 154, 194, .12)); }
-.donate h3 { color: var(--gold); }
-.donate-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-.donate-btns a { display: grid; place-items: center; text-decoration: none; font-size: 14px; }
+.donate { position: relative; overflow: hidden; padding: 20px 18px; text-align: center;
+  background: linear-gradient(150deg, rgba(255, 214, 120, .38), rgba(243, 154, 194, .30) 55%, rgba(160, 120, 255, .30));
+  border: 1.5px solid rgba(255, 230, 160, .75); box-shadow: 0 0 34px rgba(255, 214, 120, .25); }
+.donate::before { content: '☕'; display: block; font-size: 40px; line-height: 1; margin-bottom: 6px; filter: drop-shadow(0 0 10px rgba(255, 224, 138, .7)); }
+.donate .card-k { color: #ffe7a6 !important; font-size: 14px; }
+.donate h3 { color: #fff3c4; font-size: 22px; margin: 4px 0 10px; text-shadow: 0 0 14px rgba(255, 214, 120, .5); }
+.donate > p { font-size: 16px !important; color: #fff !important; line-height: 1.7; }
+.donate-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.donate-btns a { display: grid; place-items: center; height: 54px; border-radius: 14px; border: 0; text-decoration: none; font-size: 16px; font-weight: 700; box-shadow: 0 6px 18px rgba(0, 0, 0, .25); transition: transform .15s; }
+.donate-btns a:active { transform: scale(.97); }
+.donate-btns .don-toss { background: #3182f6; color: #fff; }
+.donate-btns .don-kakao { background: #fee500; color: #191919; }
+.donate .don-note { margin-top: 12px; font-size: 13px !important; color: #f3ecff !important; opacity: .9; line-height: 1.6; }
 .lucky-pop { position: relative; padding: 22px 18px 16px; border-radius: 22px; background: linear-gradient(160deg, #241552, #120a2e); border: 1px solid rgba(255, 230, 160, .4); }
 .lucky-pop h3 { font-family: var(--serif); font-size: 20px; color: var(--gold); }
 .lucky-pop p { font-size: 14px; color: var(--ink2); }
