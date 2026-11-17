@@ -240,6 +240,7 @@
       animal: ANIMALS[yp.branch],
       elements: counts,
       monthTerm: { name: lj.cur.ko, at: lj.cur.ms },
+      utc: utc, sajuYear: sajuYear, hasTime: hasTime,
       notes: notes
     };
   }

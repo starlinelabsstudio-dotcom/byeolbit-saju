@@ -342,7 +342,68 @@
   }
   $('btnAgain').addEventListener('click', function () { goInput(false); });
   $('btnFriend').addEventListener('click', function () { goInput(true); $('fName').focus(); });
-  $('homeLink').addEventListener('click', function (e) { e.preventDefault(); goInput(false); });
+  $('homeLink').addEventListener('click', function (e) { e.preventDefault(); document.body.classList.remove('reading'); $('viewReport').hidden = true; goInput(false); });
+  // ---------- 깊은 감정서 ----------
+  var SIZE_KEY = 'byeolbit-saju-size';
+  function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function setSize(v) {
+    $('viewReport').style.setProperty('--rs', v);
+    document.querySelectorAll('.rp-size button').forEach(function (b) { b.classList.toggle('on', b.dataset.s === String(v)); });
+    try { localStorage.setItem(SIZE_KEY, String(v)); } catch (e) { }
+  }
+  document.querySelectorAll('.rp-size button').forEach(function (b) { b.addEventListener('click', function () { setSize(b.dataset.s); }); });
+  function renderBlock(b) {
+    if (b.h) return '<h4>' + esc(b.h) + '</h4>';
+    if (b.p) return '<p class="' + (b.cls || '') + '">' + esc(b.p) + '</p>';
+    if (b.table) return '<table class="rp-table">' + b.table.map(function (t) { return '<tr><td>' + esc(t.pos) + '</td><td>' + esc(t.char) + '</td><td>' + esc(t.god) + '</td></tr>'; }).join('') + '</table>';
+    if (b.chips) return '<p class="rp-label">' + esc(b.label) + '</p><div class="rp-chips">' + b.chips.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</div>';
+    if (b.list) return '<p class="rp-label">' + esc(b.label) + '</p><ul class="rp-ul">' + b.list.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>';
+    if (b.timeline) return '<div class="rp-tl">' + b.timeline.map(function (t) { return '<div class="' + (t.current ? 'cur' : '') + '"><span>' + esc(t.age) + '<br><small>' + esc(t.year) + '</small></span><b class="' + t.el + '">' + esc(t.pillar) + '</b><span>' + esc(t.title) + '</span></div>'; }).join('') + '</div>';
+    if (b.lucky) return '<div class="rp-lucky">' + b.lucky.map(function (l) { return '<div><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join('') + '</div>';
+    return '';
+  }
+  function showReport() {
+    if (!last) return;
+    var input = last.input, r = last.result;
+    var a = window.SajuAnalysis.analyze(r, { gender: input.gender });
+    var rep = window.DeepReport.build(r, a, input);
+    $('rpTitle').textContent = (input.name ? input.name + '님' : '나') + '의 깊은 감정서';
+    $('rpSub').textContent = $('rSub').textContent + ' · ' + (input.gender === 'M' ? '남' : '여');
+    $('rpPillars').innerHTML = ['hour', 'day', 'month', 'year'].map(function (k) {
+      var p = r.pillars[k], lab = { hour: '시', day: '일·나', month: '월', year: '년' }[k];
+      return '<div class="' + (k === 'day' ? 'me' : '') + '"><span class="' + (p ? p.stemElement : '') + '">' + (p ? p.stemHanja : '?') + '</span><br><span class="' + (p ? p.branchElement : '') + '">' + (p ? p.branchHanja : '?') + '</span><small>' + lab + '</small></div>';
+    }).join('');
+    $('rpSummary').innerHTML = rep.summary.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
+    $('rpToc').innerHTML = rep.chapters.map(function (c, i) { return '<a href="#ch-' + c.id + '">' + (i + 1) + '. ' + esc(c.title) + '</a>'; }).join('');
+    $('rpBody').innerHTML = rep.chapters.map(function (c, i) {
+      return '<article class="glass card rp-ch" id="ch-' + c.id + '"><p class="no">제 ' + (i + 1) + ' 장</p><h3>' + esc(c.title) + '</h3><p class="chsub">' + esc(c.sub) + '</p>' + c.blocks.map(renderBlock).join('') + '</article>';
+    }).join('');
+    // 맨 위 행운 아이템(광고 표시 먼저), 맨 아래 후원
+    if (luckyToday) { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
+    var DN = window.SAJU_LUCKY && window.SAJU_LUCKY.DONATE, donOn = !!(DN && DN.enabled && (DN.toss || DN.kakao));
+    $('rpDonate').hidden = !donOn;
+    if (donOn) { $('rpDonToss').hidden = !DN.toss; $('rpDonToss').href = DN.toss || '#'; $('rpDonKakao').hidden = !DN.kakao; $('rpDonKakao').href = DN.kakao || '#'; }
+    var sz = '1'; try { sz = localStorage.getItem(SIZE_KEY) || '1'; } catch (e) { }
+    setSize(sz);
+    $('viewResult').hidden = true; $('viewReport').hidden = false; scrollTo(0, 0);
+    document.body.classList.add('reading');
+    var chs = document.querySelectorAll('#viewReport .rp-ch');
+    chs.forEach(function (c, i) { c.classList.add('reveal'); setTimeout(function () { c.classList.add('in'); }, 200 + i * 120); });
+    window.__lastReportChars = rep.chars;
+  }
+  $('btnDeep').addEventListener('click', function () {
+    $('gatherText').textContent = '감정서를 펼치고 있어요…';
+    gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showReport(); });
+  });
+  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewReport').hidden = true; $('viewResult').hidden = false; $('rDeepCta').scrollIntoView(); });
+  $('rpTop').addEventListener('click', function () { scrollTo(0, 0); });
+  $('rpPrint').addEventListener('click', function () { var v = $('viewReport').style.getPropertyValue('--rs'); window.print(); });
+  $('rpPrintBig').addEventListener('click', function () {
+    var prev = $('viewReport').style.getPropertyValue('--rs') || '1';
+    $('viewReport').style.setProperty('--rs', '1.35');
+    setTimeout(function () { window.print(); $('viewReport').style.setProperty('--rs', prev); }, 50);
+  });
+
   // ---------- 별빛 공유 카드 (1080×1350) ----------
   var last = null, cardBlob = null;
   function loadImg(src) { return new Promise(function (ok, no) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = no; i.src = src; }); }
