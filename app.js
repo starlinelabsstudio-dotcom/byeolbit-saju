@@ -7,13 +7,6 @@
   var $ = function (id) { return document.getElementById(id); };
   var EL_KO = { wood: '나무', fire: '불', earth: '흙', metal: '쇠', water: '물' };
   var EL_ORDER = ['wood', 'fire', 'earth', 'metal', 'water'];
-  // 시·도 단위 (도는 도의 가운데쯤 경도). 경도 1도 차이는 시각 약 4분 차이라, 같은 도 안에서는 결과가 거의 같다.
-  var PLACES = [
-    ['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.71], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29],
-    ['경기도', 127.20], ['강원도', 128.30], ['충청북도', 127.70], ['충청남도', 126.90], ['전라북도', 127.10], ['전라남도', 126.90],
-    ['경상북도', 128.70], ['경상남도', 128.40], ['제주도', 126.53], ['북한 지역', 126.50], ['해외 · 잘 모름 (서울로 계산)', 126.98]
-  ];
-  function placeIndex(name) { for (var i = 0; i < PLACES.length; i++) if (PLACES[i][0] === name) return i; return -1; }
   var STORE_KEY = 'byeolbit-saju-last';
   var POP_KEY = 'byeolbit-saju-lucky-day';
   var luckyToday = null;
@@ -121,11 +114,16 @@
     opt($('fHour'), h, ap + ' ' + hh + '시', h === 12);
   }
   for (var mi = 0; mi < 60; mi++) opt($('fMin'), mi, mi + '분', mi === 0);
-  opt($('fPlace'), '', '태어난 곳을 골라 주세요', true);
-  $('fPlace').options[0].disabled = true;
-  PLACES.forEach(function (p, i) { opt($('fPlace'), i, p[0], false); });
-  $('fPlace').addEventListener('change', function () { this.classList.toggle('empty', this.value === ''); });
-  $('fPlace').classList.add('empty');
+  // 태어난 곳: 적는 즉시 어디로 알아들었는지 보여 준다
+  function showPlace() {
+    var r = window.SajuPlaces.resolve($('fPlace').value), h = $('fPlaceHint');
+    h.className = 'place-hint ' + r.kind;
+    if (r.kind === 'empty') h.textContent = '예) 경북 포항, 부산 해운대, 전주, 서울 강남';
+    else if (r.ok) h.textContent = '✓ ' + r.label + ' 기준으로 계산해요';
+    else h.textContent = '‘' + $('fPlace').value.trim() + '’은(는) 찾지 못했어요. 시·군·구 이름으로 적어 주세요 (예: 경북 포항)';
+    return r;
+  }
+  $('fPlace').addEventListener('input', function () { showPlace(); $('formErr').textContent = ''; });
 
   $('fYear').addEventListener('change', fillDays);
   $('fMonth').addEventListener('change', fillDays);
@@ -155,16 +153,16 @@
       $('fNoTime').checked = s.hour == null;
       $('fHour').disabled = $('fMin').disabled = s.hour == null;
       if (s.hour != null) { $('fHour').value = s.hour; $('fMin').value = s.minute; }
-      var pi = placeIndex(s.placeName || '');
-      if (pi >= 0) { $('fPlace').value = pi; $('fPlace').classList.remove('empty'); }
+      $('fPlace').value = s.placeText || '';
       $('fJasi').value = s.jasi || 'jojasi';
       $('fNoCorr').checked = !!s.noCorr;
     } catch (e) { /* 저장 안 되는 환경 */ }
   }
   loadLast();
+  showPlace();
 
   function readForm() {
-    var pv = $('fPlace').value, place = pv === '' ? null : PLACES[+pv];
+    var pr = window.SajuPlaces.resolve($('fPlace').value);
     var noTime = $('fNoTime').checked;
     return {
       name: $('fName').value.trim(),
@@ -173,7 +171,7 @@
       leap: $('fLeap').checked,
       year: +$('fYear').value, month: +$('fMonth').value, day: +$('fDay').value,
       hour: noTime ? null : +$('fHour').value, minute: noTime ? null : +$('fMin').value,
-      placeName: place ? place[0] : '', longitude: place ? place[1] : 126.98,
+      placeText: $('fPlace').value.trim(), placeName: pr.label, placeKind: pr.kind, longitude: pr.lon,
       jasi: $('fJasi').value, noCorr: $('fNoCorr').checked, solarCorrection: !$('fNoCorr').checked
     };
   }
@@ -181,7 +179,9 @@
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var input = readForm();
-    if (!input.placeName) { $('formErr').textContent = '태어난 곳을 골라 주세요. 모르면 맨 아래 "해외 · 잘 모름"을 고르면 돼요.'; $('fPlace').focus(); return; }
+    if (input.placeKind === 'empty') { $('formErr').textContent = '태어난 곳을 적어 주세요. 모르시면 "모름"이라고 적어도 돼요 (서울 기준으로 계산해요).'; $('fPlace').focus(); return; }
+    if (input.placeKind === 'none' && !/모름|모르|몰라|해외|외국/.test(input.placeText)) { $('formErr').textContent = '‘' + input.placeText + '’은(는) 찾지 못했어요. 시·군·구 이름으로 적어 주세요. 모르시면 "모름"이라고 적어 주세요.'; $('fPlace').focus(); return; }
+    if (input.placeKind === 'none') { input.placeName = '서울(태어난 곳 모름)'; }
     var result;
     try { result = E.calculate(input); }
     catch (e) { $('formErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
@@ -342,7 +342,7 @@
     }
 
     $('rNotes').innerHTML = r.notes.map(function (n) { return '<li>' + n + '</li>'; }).join('') +
-      '<li>이달의 기준 절기: ' + r.monthTerm.name + '</li>';
+      '<li>이달의 기준 절기: ' + r.monthTerm.name + '</li>' + (input.placeName ? '<li>태어난 곳: ' + esc(input.placeName) + '</li>' : '');
 
     $('viewInput').hidden = true; $('viewResult').hidden = false;
     scrollTo(0, 0);
@@ -353,7 +353,7 @@
   }
 
   function goInput(clear) {
-    if (clear) { $('fName').value = ''; $('fPlace').value = ''; $('fPlace').classList.add('empty'); }
+    if (clear) { $('fName').value = ''; $('fPlace').value = ''; showPlace(); }
     $('viewResult').hidden = true; $('viewInput').hidden = false; scrollTo(0, 0);
   }
   $('btnAgain').addEventListener('click', function () { goInput(false); });

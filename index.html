@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.6.2">
+<link rel="stylesheet" href="style.css?v=0.6.3">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -77,8 +77,9 @@
       </div>
 
       <label class="field">
-        <span>태어난 곳 <small>(시·도까지만, 시간 보정에 써요)</small></span>
-        <select id="fPlace"></select>
+        <span>태어난 곳을 적어 주세요 <small>(시간 보정에 써요)</small></span>
+        <input id="fPlace" type="text" maxlength="30" placeholder="예) 경북 포항" autocomplete="off">
+        <small class="place-hint" id="fPlaceHint"></small>
       </label>
 
       <details class="more">
@@ -270,16 +271,17 @@
   <p id="gatherText">별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.6.2"></script>
-<script src="js/jie-table.js?v=0.6.2"></script>
-<script src="js/saju-engine.js?v=0.6.2"></script>
-<script src="js/texts.js?v=0.6.2"></script>
-<script src="js/lucky-items.js?v=0.6.2"></script>
-<script src="js/saju-analysis.js?v=0.6.2"></script>
-<script src="js/deep-a.js?v=0.6.2"></script>
-<script src="js/deep-b.js?v=0.6.2"></script>
-<script src="js/deep-c.js?v=0.6.2"></script>
-<script src="js/deep-report.js?v=0.6.2"></script>
-<script src="app.js?v=0.6.2"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.6.3"></script>
+<script src="js/jie-table.js?v=0.6.3"></script>
+<script src="js/saju-engine.js?v=0.6.3"></script>
+<script src="js/places.js?v=0.6.3"></script>
+<script src="js/texts.js?v=0.6.3"></script>
+<script src="js/lucky-items.js?v=0.6.3"></script>
+<script src="js/saju-analysis.js?v=0.6.3"></script>
+<script src="js/deep-a.js?v=0.6.3"></script>
+<script src="js/deep-b.js?v=0.6.3"></script>
+<script src="js/deep-c.js?v=0.6.3"></script>
+<script src="js/deep-report.js?v=0.6.3"></script>
+<script src="app.js?v=0.6.3"></script>
 </body>
 </html>
