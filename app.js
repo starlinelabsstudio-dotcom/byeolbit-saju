@@ -32,6 +32,7 @@
     }
     var nt = $(pre + 'Notice');
     nt.textContent = L.notice; nt.hidden = !L.notice;
+    var ad = $(pre + 'Ad'); if (ad) ad.hidden = !L.notice;
   }
   function maybeLuckyPopup() {
     var LK = window.SAJU_LUCKY;

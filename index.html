@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.5.1">
+<link rel="stylesheet" href="style.css?v=0.5.2">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -143,12 +143,12 @@
     </article>
 
     <article class="glass card lucky-card" id="rLuckyItem">
-      <p class="card-k">오늘의 행운 아이템</p>
+      <p class="card-k"><span class="ad-tag" id="rLiAd" hidden>광고</span> 오늘의 행운 아이템</p>
+      <p class="ad-notice" id="rLiNotice" hidden></p>
       <a class="li-photo" id="rLiPhoto" href="#" target="_blank" rel="noopener sponsored" aria-label="행운 아이템 쿠팡에서 보기"></a>
       <h3 id="rLiName"></h3>
       <p id="rLiWhy"></p>
       <a class="btn-main li-go" id="rLiLink" href="#" target="_blank" rel="noopener sponsored">쿠팡에서 보기 ↗</a>
-      <p class="li-notice" id="rLiNotice" hidden></p>
     </article>
 
     <article class="glass card donate" id="rDonate" hidden>
@@ -183,13 +183,13 @@
 <div class="modal" id="luckyModal" hidden role="dialog" aria-modal="true" aria-label="오늘의 행운 아이템">
   <div class="modal-box lucky-pop">
     <button class="pop-x" id="lpClose" type="button" aria-label="닫기">✕</button>
-    <p class="pill">✦ 오늘 나에게 온 행운 아이템</p>
+    <p class="pill"><span class="ad-tag">광고</span> 오늘 나에게 온 행운 아이템</p>
+    <p class="ad-notice" id="lpNotice"></p>
     <a class="li-photo" id="lpPhoto" href="#" target="_blank" rel="noopener sponsored" aria-label="행운 아이템 쿠팡에서 보기"></a>
     <h3 id="lpName"></h3>
     <p id="lpWhy"></p>
     <a class="btn-main li-go" id="lpLink" href="#" target="_blank" rel="noopener sponsored">쿠팡에서 보기 ↗</a>
     <button class="btn-sub" id="lpSkip" type="button">닫고 결과 계속 보기</button>
-    <p class="li-notice" id="lpNotice"></p>
   </div>
 </div>
 
@@ -210,11 +210,11 @@
   <p>별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.5.1"></script>
-<script src="js/jie-table.js?v=0.5.1"></script>
-<script src="js/saju-engine.js?v=0.5.1"></script>
-<script src="js/texts.js?v=0.5.1"></script>
-<script src="js/lucky-items.js?v=0.5.1"></script>
-<script src="app.js?v=0.5.1"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.5.2"></script>
+<script src="js/jie-table.js?v=0.5.2"></script>
+<script src="js/saju-engine.js?v=0.5.2"></script>
+<script src="js/texts.js?v=0.5.2"></script>
+<script src="js/lucky-items.js?v=0.5.2"></script>
+<script src="app.js?v=0.5.2"></script>
 </body>
 </html>
