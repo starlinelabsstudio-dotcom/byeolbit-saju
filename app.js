@@ -118,9 +118,9 @@
   function showPlace() {
     var r = window.SajuPlaces.resolve($('fPlace').value), h = $('fPlaceHint');
     h.className = 'place-hint ' + r.kind;
-    if (r.kind === 'empty') h.textContent = '예) 경북 포항, 부산 해운대, 전주, 서울 강남';
+    if (r.kind === 'empty') h.textContent = '꼭 적어 주세요. 예) 경북 포항, 부산 해운대, 전주 · 모르면 도만 (예: 경북)';
     else if (r.ok) h.textContent = '✓ ' + r.label + ' 기준으로 계산해요';
-    else h.textContent = '‘' + $('fPlace').value.trim() + '’은(는) 찾지 못했어요. 시·군·구 이름으로 적어 주세요 (예: 경북 포항)';
+    else h.textContent = '‘' + $('fPlace').value.trim() + '’은(는) 찾지 못했어요. 시·군·구나 도 이름으로 적어 주세요 (예: 경북 포항, 경북)';
     return r;
   }
   $('fPlace').addEventListener('input', function () { showPlace(); $('formErr').textContent = ''; });
@@ -179,9 +179,9 @@
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var input = readForm();
-    if (input.placeKind === 'empty') { $('formErr').textContent = '태어난 곳을 적어 주세요. 모르시면 "모름"이라고 적어도 돼요 (서울 기준으로 계산해요).'; $('fPlace').focus(); return; }
-    if (input.placeKind === 'none' && !/모름|모르|몰라|해외|외국/.test(input.placeText)) { $('formErr').textContent = '‘' + input.placeText + '’은(는) 찾지 못했어요. 시·군·구 이름으로 적어 주세요. 모르시면 "모름"이라고 적어 주세요.'; $('fPlace').focus(); return; }
-    if (input.placeKind === 'none') { input.placeName = '서울(태어난 곳 모름)'; }
+    // 태어난 곳은 꼭 넣어야 한다 (모르면 도·광역시만이라도)
+    if (input.placeKind === 'empty') { $('formErr').textContent = '태어난 곳을 적어 주세요. 정확히 모르시면 도나 시만 적어도 돼요 (예: 경북, 부산).'; $('fPlace').focus(); return; }
+    if (input.placeKind === 'none') { $('formErr').textContent = '‘' + input.placeText + '’은(는) 찾지 못했어요. 시·군·구나 도 이름으로 적어 주세요 (예: 경북 포항, 경북).'; $('fPlace').focus(); return; }
     var result;
     try { result = E.calculate(input); }
     catch (e) { $('formErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
