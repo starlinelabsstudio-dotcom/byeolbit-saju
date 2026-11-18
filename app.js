@@ -19,7 +19,7 @@
     ph.style.setProperty('--li-col', L.col);
     if (it.img) {
       ph.style.backgroundImage = '';
-      ph.innerHTML = '<img alt="' + it.name.replace(/"/g, '') + '" src="' + it.img + '"><span class="li-tag">쿠팡</span>';
+      ph.innerHTML = '<img alt="' + it.name.replace(/"/g, '') + '" src="' + it.img + '">';
       ph.querySelector('img').onerror = function () { var card = ph.closest('.lucky-card'); if (card) card.hidden = true; };
     } else {
       ph.style.display = 'none';
