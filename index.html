@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>별빛 사주 — 별이 읽어주는 나의 사주</title>
-<meta name="description" content="생년월일시만 넣으면 사주 8글자, 다섯 기운, 일주 풀이, 오늘의 운세, 2027 신년운세, 연애 궁합을 무료로 보여드려요. 가입 없이, 정보는 내 휴대폰 안에서만 계산해요.">
+<meta name="description" content="생년월일시만 넣으면 사주 8글자, 다섯 기운, 일주 풀이, 오늘의 운세, 2027 신년운세, 연애 궁합·속궁합·일 궁합을 무료로 보여드려요. 가입 없이, 정보는 내 휴대폰 안에서만 계산해요.">
 <meta name="theme-color" content="#120a2e">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://starlinelabsstudio-dotcom.github.io/byeolbit-saju/">
@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.9.0">
+<link rel="stylesheet" href="style.css?v=0.10.0">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -97,7 +97,7 @@
       <p class="err" id="formErr" role="alert"></p>
       <button class="btn-main" type="submit">✦ 내 사주 보기</button>
       <button class="btn-sub ny-go" id="btnNyForm" type="button">🎍 2027 신년운세 보기</button>
-      <button class="btn-sub mt-go" id="btnMtForm" type="button">💞 연애 궁합 보기</button>
+      <button class="btn-sub mt-go" id="btnMtForm" type="button">💞 궁합 보기</button>
       <p class="privacy">입력한 정보는 이 휴대폰 안에서만 계산해요. 어디에도 보내지 않아요.</p>
     </form>
     <a class="glass more-link" href="ilju/">✧ 60일주 성격 풀이 모아보기 <span>→</span></a>
@@ -106,11 +106,20 @@
   <!-- 연애 궁합: 상대 입력 -->
   <section id="viewMatch" class="view" hidden>
     <div class="intro">
-      <p class="pill">💞 연애 궁합 · 무료</p>
+      <p class="pill">💞 궁합 · 무료</p>
       <h1>두 사람의 별을<br><em>이어 볼게요</em></h1>
       <p class="lead" id="mtMe"></p>
     </div>
     <form id="mtForm" class="glass form" novalidate>
+      <div class="field">
+        <span>어떤 궁합을 볼까요?</span>
+        <div class="seg mk-seg" role="radiogroup" aria-label="궁합 종류">
+          <label><input type="radio" name="mkind" value="mt" checked><b><i>💞</i>연애</b></label>
+          <label><input type="radio" name="mkind" value="sk"><b><i>💗</i>속궁합</b></label>
+          <label><input type="radio" name="mkind" value="wk"><b><i>💼</i>일 궁합</b></label>
+        </div>
+        <p class="mk-tip" id="mkTip">두 사람의 기본 결, 함께 있을 때의 분위기, 서로에게 어떤 사람인지 풀어 드려요.</p>
+      </div>
       <label class="field">
         <span>상대 이름 또는 별명 <small>(안 적어도 돼요)</small></span>
         <input id="pName" type="text" maxlength="12" placeholder="별이" autocomplete="off">
@@ -205,10 +214,10 @@
     </article>
 
     <article class="glass card mt-cta" id="rMtCta">
-      <p class="card-k">💞 연애 궁합 · 무료</p>
+      <p class="card-k">💞 궁합 · 무료</p>
       <h3>이 사람과 궁합 보기</h3>
-      <p>상대 생일만 넣으면, 두 사람의 기본 결과 함께 있을 때의 분위기, <b>서로에게 어떤 사람인지</b> 풀어 드려요.</p>
-      <button class="btn-main" id="btnMt" type="button">💞 연애 궁합 보기</button>
+      <p>상대 생일만 넣으면 <b>연애 · 속궁합 · 일 궁합</b> 가운데 골라 볼 수 있어요. 두 사람의 사주 글자가 어떻게 만나는지 풀어 드려요.</p>
+      <button class="btn-main" id="btnMt" type="button">💞 궁합 보기</button>
     </article>
 
     <article class="glass card lucky-card" id="rLuckyItem" hidden>
@@ -286,6 +295,12 @@
     <div class="actions rp-actions">
       <button class="btn-main" id="rpNyCard" type="button" hidden>✧ 나의 2027 카드 만들기</button>
       <button class="btn-main" id="rpMtCard" type="button" hidden>💞 우리 궁합 카드 만들기</button>
+      <button class="btn-main" id="rpWkCard" type="button" hidden>💼 우리 팀 카드 만들기</button>
+      <div class="mk-other" id="rpOther" hidden>
+        <p>같은 사람과 다른 궁합 보기</p>
+        <button class="btn-sub" id="rpOtherA" type="button"></button>
+        <button class="btn-sub" id="rpOtherB" type="button"></button>
+      </div>
       <button class="btn-sub" id="rpMtAgain" type="button" hidden>💞 다른 사람과 궁합 보기</button>
       <button class="btn-main" id="rpPrint" type="button">✦ PDF로 저장 · 인쇄</button>
       <button class="btn-sub" id="rpPrintBig" type="button">큰 글자 PDF로 저장 (부모님용)</button>
@@ -354,21 +369,23 @@
   <p id="gatherText">별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.9.0"></script>
-<script src="js/jie-table.js?v=0.9.0"></script>
-<script src="js/saju-engine.js?v=0.9.0"></script>
-<script src="js/places.js?v=0.9.0"></script>
-<script src="js/texts.js?v=0.9.0"></script>
-<script src="js/lucky-items.js?v=0.9.0"></script>
-<script src="js/saju-analysis.js?v=0.9.0"></script>
-<script src="js/deep-a.js?v=0.9.0"></script>
-<script src="js/deep-b.js?v=0.9.0"></script>
-<script src="js/deep-c.js?v=0.9.0"></script>
-<script src="js/deep-report.js?v=0.9.0"></script>
-<script src="js/newyear-texts.js?v=0.9.0"></script>
-<script src="js/newyear.js?v=0.9.0"></script>
-<script src="js/match-texts.js?v=0.9.0"></script>
-<script src="js/match.js?v=0.9.0"></script>
-<script src="app.js?v=0.9.0"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.10.0"></script>
+<script src="js/jie-table.js?v=0.10.0"></script>
+<script src="js/saju-engine.js?v=0.10.0"></script>
+<script src="js/places.js?v=0.10.0"></script>
+<script src="js/texts.js?v=0.10.0"></script>
+<script src="js/lucky-items.js?v=0.10.0"></script>
+<script src="js/saju-analysis.js?v=0.10.0"></script>
+<script src="js/deep-a.js?v=0.10.0"></script>
+<script src="js/deep-b.js?v=0.10.0"></script>
+<script src="js/deep-c.js?v=0.10.0"></script>
+<script src="js/deep-report.js?v=0.10.0"></script>
+<script src="js/newyear-texts.js?v=0.10.0"></script>
+<script src="js/newyear.js?v=0.10.0"></script>
+<script src="js/match-texts.js?v=0.10.0"></script>
+<script src="js/match.js?v=0.10.0"></script>
+<script src="js/match-more-texts.js?v=0.10.0"></script>
+<script src="js/match-more.js?v=0.10.0"></script>
+<script src="app.js?v=0.10.0"></script>
 </body>
 </html>

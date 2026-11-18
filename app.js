@@ -414,6 +414,13 @@
         }).join('') + '</div>';
       }).join('') + '<p class="mt-bar-k">' + b.bars.map(function (x, i) { return '<span class="b' + i + '">' + esc(x.name) + '</span>'; }).join('') + '</p></div>';
     }
+    if (b.roles) return '<table class="wk-roles"><tr><th>일</th><th>' + esc(b.roles.names[0]) + '</th><th>' + esc(b.roles.names[1]) + '</th><th>맡으면 좋은 사람</th></tr>' + b.roles.rows.map(function (x) {
+      return '<tr><td><b class="' + x.el + '">' + esc(x.job) + '</b><small>' + esc(x.elKo) + ' 기운</small></td><td' + (x.a > x.b ? ' class="hi"' : '') + '>' + x.a + '</td><td' + (x.b > x.a ? ' class="hi"' : '') + '>' + x.b + '</td><td>' + esc(x.who) + '</td></tr>';
+    }).join('') + '</table>';
+    if (b.temps) return '<div class="sk-temps">' + b.temps.map(function (t) {
+      var x = (Math.max(-6, Math.min(6, t.v)) + 6) / 12 * 100;
+      return '<div class="sk-temp"><span class="who">' + esc(t.name) + '</span><span class="track"><i class="' + t.cls + '" style="left:' + x.toFixed(1) + '%"></i></span><span class="tv">' + ({ warm: '따뜻함', mild: '알맞음', cool: '시원함' }[t.cls]) + '</span></div>';
+    }).join('') + '<p class="sk-temp-k"><span>❄ 시원함</span><span>따뜻함 ☀</span></p></div>';
     if (b.months) return '<div class="ny-mos">' + b.months.map(function (m) {
       return '<div class="ny-mo' + (m.help ? ' help' : '') + '"><div class="ny-mo-h"><b>' + esc(m.label) + '</b><span>' + esc(m.range) + '</span><em class="' + m.pillar.stemElement + '">' + esc(m.pillar.ko) + ' ' + m.pillar.hanja + '</em></div>' +
         '<p class="ny-flow">' + esc(m.flow) + (m.help ? ' <i>★ 힘이 나는 달</i>' : '') + '</p><p>' + esc(m.text) + '</p><p class="ny-tip">✓ ' + esc(m.tip) + '</p></div>';
@@ -456,10 +463,19 @@
   var rpMode = 'deep', RP_HOW = null;
   function setRpHead(mode) {
     if (RP_HOW === null) RP_HOW = $('rpHow').textContent;
-    $('rpPill').textContent = mode === 'ny' ? '🎍 별빛 2027 신년운세' : mode === 'mt' ? '💞 별빛 연애 궁합' : '✦ 별빛 깊은 감정서';
+    var isM = mode === 'mt' || mode === 'sk' || mode === 'wk';
+    $('rpPill').textContent = mode === 'ny' ? '🎍 별빛 2027 신년운세' : mode === 'mt' ? '💞 별빛 연애 궁합' : mode === 'sk' ? '💗 별빛 속궁합' : mode === 'wk' ? '💼 별빛 일 궁합' : '✦ 별빛 깊은 감정서';
     $('rpPillars').className = 'rp-mini';
-    $('rpMtCard').hidden = $('rpMtAgain').hidden = mode !== 'mt';
-    $('rpHow').textContent = mode === 'mt' ? '이 궁합은 두 사람의 사주 글자를 명리학의 규칙(천간합·오행의 상생상극·지지의 합충형·원진·십신)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 성별은 계산에 쓰지 않아요.' : mode === 'ny' ? '이 신년운세는 내 사주 여덟 글자와 2027년 정미년, 그리고 절기로 바뀌는 열두 달의 글자를 명리학의 규칙(십신·합충·신살·대운)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요.' : RP_HOW;
+    $('rpMtCard').hidden = mode !== 'mt'; $('rpWkCard').hidden = mode !== 'wk';
+    $('rpMtAgain').hidden = $('rpOther').hidden = !isM;
+    if (isM) {
+      var others = ['mt', 'sk', 'wk'].filter(function (k) { return k !== mode; });
+      $('rpOtherA').textContent = MK_LABEL[others[0]]; $('rpOtherA').dataset.k = others[0];
+      $('rpOtherB').textContent = MK_LABEL[others[1]]; $('rpOtherB').dataset.k = others[1];
+    }
+    $('rpHow').textContent = mode === 'sk' ? '이 속궁합은 두 사람의 배우자 자리(일지)와 천간합, 도화, 사주의 온도와 양·음, 식상·인성 기운을 명리학의 규칙으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 재미로 비유한 풀이이며 성별은 계산에 쓰지 않아요.'
+      : mode === 'wk' ? '이 일 궁합은 두 사람의 일간 오행 관계(십신)와 일하는 자리(월지)의 합충, 다섯 기운의 수, 사주의 온도를 명리학의 규칙으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 동업·투자 같은 결정은 전문가와 상의해 주세요.'
+      : mode === 'mt' ? '이 궁합은 두 사람의 사주 글자를 명리학의 규칙(천간합·오행의 상생상극·지지의 합충형·원진·십신)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 성별은 계산에 쓰지 않아요.' : mode === 'ny' ? '이 신년운세는 내 사주 여덟 글자와 2027년 정미년, 그리고 절기로 바뀌는 열두 달의 글자를 명리학의 규칙(십신·합충·신살·대운)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요.' : RP_HOW;
     $('rpNyCard').hidden = mode !== 'ny';
   }
   function waveSvg(ms) {
@@ -514,7 +530,15 @@
     gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showNewYear(); });
   });
 
-  // ---------- 연애 궁합 ----------
+  // ---------- 궁합 (연애 · 속궁합 · 일 궁합) ----------
+  var MK_LABEL = { mt: '💞 연애 궁합 보기', sk: '💗 속궁합 보기', wk: '💼 일 궁합 보기' };
+  var MK_TIP = { mt: '두 사람의 기본 결, 함께 있을 때의 분위기, 서로에게 어떤 사람인지 풀어 드려요.',
+    sk: '두 사람의 끌림, 온도, 가까워지는 속도, 어울리는 분위기를 사주로 비유해 풀어 드려요.',
+    wk: '함께 일할 때 누가 이끌고 누가 받쳐 주는지, 각자 잘하는 일과 부딪치기 쉬운 순간을 풀어 드려요.' };
+  function mkind() { var c = document.querySelector('input[name=mkind]:checked'); return c ? c.value : 'mt'; }
+  document.querySelectorAll('input[name=mkind]').forEach(function (x) { x.addEventListener('change', function () { $('mkTip').textContent = MK_TIP[mkind()]; }); });
+  function otherKind() { var k = this.dataset.k; if (!last || !lastP || !k) return; document.querySelector('input[name=mkind][value=' + k + ']').checked = true; $('mkTip').textContent = MK_TIP[k]; showMatch(k); }
+  $('rpOtherA').addEventListener('click', otherKind); $('rpOtherB').addEventListener('click', otherKind);
   var P_KEY = 'byeolbit-saju-partner', mtFrom = 'result', resultShown = false, lastMt = null, lastP = null;
   function openMatch() {
     var me = last.input;
@@ -551,11 +575,12 @@
     try { pr = E.calculate(pin); } catch (e) { $('mtErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
     try { localStorage.setItem(P_KEY, JSON.stringify(pin)); } catch (e) { }
     lastP = { input: pin, result: pr };
+    var kind = mkind();
     $('gatherText').textContent = '두 사람의 별을 잇고 있어요…';
     gather(function () {
       $('gatherText').textContent = '별을 모으고 있어요…';
       if (!resultShown) { showResult(last.input, last.result, true); resultShown = true; }
-      showMatch();
+      showMatch(kind);
     });
   });
   function pillRow(r) {
@@ -564,13 +589,15 @@
       return '<div class="' + (k === 'day' ? 'me' : '') + '"><span class="' + (p ? p.stemElement : '') + '">' + (p ? p.stemHanja : '?') + '</span><br><span class="' + (p ? p.branchElement : '') + '">' + (p ? p.branchHanja : '?') + '</span><small>' + lab + '</small></div>';
     }).join('') + '</div>';
   }
-  function showMatch() {
+  function showMatch(kind) {
     if (!last || !lastP) return;
-    var rep = window.Match.build(last.result, last.input, lastP.result, lastP.input);
-    lastMt = rep; rpMode = 'mt'; setRpHead('mt');
-    var meName = last.input.name || '나';
-    $('rpTitle').textContent = meName + ' 💞 ' + (lastP.input.name || '상대');
-    $('rpSub').textContent = '연애 궁합 · ' + rep.name;
+    kind = kind || 'mt';
+    var MM = window.MatchMore;
+    var rep = kind === 'sk' ? MM.buildSok(last.result, last.input, lastP.result, lastP.input) : kind === 'wk' ? MM.buildWork(last.result, last.input, lastP.result, lastP.input) : window.Match.build(last.result, last.input, lastP.result, lastP.input);
+    lastMt = rep; rpMode = kind; setRpHead(kind);
+    var meName = last.input.name || '나', ic = { mt: ' 💞 ', sk: ' 💗 ', wk: ' 💼 ' }[kind];
+    $('rpTitle').textContent = meName + ic + (lastP.input.name || '상대');
+    $('rpSub').textContent = { mt: '연애 궁합', sk: '속궁합', wk: '일 궁합' }[kind] + ' · ' + rep.name;
     $('rpPillars').className = 'rp-mini mt-pair';
     $('rpPillars').innerHTML = '<div class="mt-row"><p class="mt-who">' + esc(meName) + '</p>' + pillRow(last.result) + '</div><div class="mt-row"><p class="mt-who">' + esc(lastP.input.name || '상대') + '</p>' + pillRow(lastP.result) + '</div>';
     $('rpSummary').innerHTML = rep.summary.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
@@ -579,7 +606,8 @@
       return '<article class="glass card rp-ch" id="ch-' + c.id + '"><p class="no">' + (i + 1) + ' / ' + rep.chapters.length + '</p><h3>' + esc(c.title) + '</h3><p class="chsub">' + esc(c.sub) + '</p>' + c.blocks.map(renderBlock).join('') + '</article>';
     }).join('');
     $('rpBody').parentNode.insertBefore($('rpLucky'), $('rpDonate'));
-    if (luckyToday) { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
+    // 속궁합에는 행운템(광고)을 붙이지 않는다
+    if (luckyToday && kind !== 'sk') { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
     var DN = window.SAJU_LUCKY && window.SAJU_LUCKY.DONATE, donOn = !!(DN && DN.enabled && (DN.toss || DN.kakao));
     $('rpDonate').hidden = !donOn;
     var sz = '1'; try { sz = localStorage.getItem(SIZE_KEY) || '1'; } catch (e) { }
@@ -670,7 +698,7 @@
     }
     sfx('open'); deepWait();
   });
-  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewMatch').hidden = true; $('viewInput').hidden = true; $('viewReport').hidden = true; $('viewResult').hidden = false; $(rpMode === 'ny' ? 'rNyCta' : rpMode === 'mt' ? 'rMtCta' : 'rDeepCta').scrollIntoView(); });
+  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewMatch').hidden = true; $('viewInput').hidden = true; $('viewReport').hidden = true; $('viewResult').hidden = false; $(rpMode === 'ny' ? 'rNyCta' : (rpMode === 'mt' || rpMode === 'sk' || rpMode === 'wk') ? 'rMtCta' : 'rDeepCta').scrollIntoView(); });
   $('rpTop').addEventListener('click', function () { scrollTo(0, 0); });
   $('rpPrint').addEventListener('click', function () { var v = $('viewReport').style.getPropertyValue('--rs'); window.print(); });
   $('rpPrintBig').addEventListener('click', function () {
@@ -793,6 +821,7 @@
     });
   }
   function makeMtCard(meIn, pIn, rA, rB, rep) {
+    var wk = rep.kind === 'wk';
     var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var g = cv.getContext('2d');
     return Promise.all([loadImg('img/sky.jpg'), document.fonts.load('700 60px "Gowun Batang"'), document.fonts.load('100px "Song Myung"'), document.fonts.load('40px "Gowun Dodum"')]).then(function (res) {
@@ -802,7 +831,7 @@
       g.fillStyle = gr; g.fillRect(0, 0, W, H);
       for (var i = 0; i < 140; i++) { g.globalAlpha = Math.random() * .8 + .2; g.fillStyle = Math.random() < .25 ? '#ffc6d9' : '#fff'; g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() * 2.2 + .4, 0, 6.283); g.fill(); }
       g.globalAlpha = 1; g.textAlign = 'center';
-      g.fillStyle = '#ffe08a'; g.font = '700 38px "Gowun Batang"'; g.fillText('✦ 별빛 사주 · 연애 궁합', W / 2, 96);
+      g.fillStyle = '#ffe08a'; g.font = '700 38px "Gowun Batang"'; g.fillText(wk ? '✦ 별빛 사주 · 일 궁합' : '✦ 별빛 사주 · 연애 궁합', W / 2, 96);
       var nA = meIn.name || '나', nB = pIn.name || '상대';
       // 두 사람의 일주
       [[rA, nA, W / 2 - 230], [rB, nB, W / 2 + 230]].forEach(function (x) {
@@ -812,15 +841,17 @@
         g.font = '150px "Song Myung"';
         [[p.stemHanja, COL[p.stemElement], 400], [p.branchHanja, COL[p.branchElement], 550]].forEach(function (c) { g.fillStyle = c[1]; g.shadowColor = c[1]; g.shadowBlur = 30; g.fillText(c[0], cx, c[2]); g.shadowBlur = 0; });
       });
-      g.font = '110px "Gowun Dodum"'; g.fillStyle = '#ff9ec0'; g.shadowColor = '#ff9ec0'; g.shadowBlur = 30; g.fillText('♥', W / 2, 420); g.shadowBlur = 0;
+      var hc = wk ? '#ffe08a' : '#ff9ec0';
+      g.font = '110px "Gowun Dodum"'; g.fillStyle = hc; g.shadowColor = hc; g.shadowBlur = 30; g.fillText(wk ? '✦' : '♥', W / 2, 420); g.shadowBlur = 0;
       g.fillStyle = '#ffe08a'; g.font = '700 64px "Gowun Batang"'; g.fillText('“' + rep.name + '”', W / 2, 740);
       g.fillStyle = '#f3ecff'; g.font = '42px "Gowun Dodum"'; g.fillText(rep.keywords.map(function (k) { return '#' + k; }).join('   '), W / 2, 830);
       g.fillStyle = '#c9bfe6'; g.font = '34px "Gowun Dodum"';
-      wrapText(g, rep.summary[1].replace('기본 결: ', ''), W / 2, 930, W - 200, 50, 2);
-      wrapText(g, rep.summary[2].replace('함께 있을 때: ', '함께 있으면 · '), W / 2, 1040, W - 200, 50, 2);
+      var l1 = wk ? rep.cardLines[0] : rep.summary[1].replace('기본 결: ', ''), l2 = wk ? rep.cardLines[1] : rep.summary[2].replace('함께 있을 때: ', '함께 있으면 · ');
+      wrapText(g, l1, W / 2, 930, W - 200, 50, 2);
+      wrapText(g, l2, W / 2, 1040, W - 200, 50, 2);
       g.fillStyle = '#c9bfe6'; g.font = '32px "Gowun Dodum"';
       var addr = (location.host + location.pathname).replace(/^www\./, '').replace(/index\.html$/, '').replace(/\/$/, '');
-      g.fillText('우리 궁합 보기 → ' + addr, W / 2, 1290);
+      g.fillText((wk ? '우리 일 궁합 보기 → ' : '우리 궁합 보기 → ') + addr, W / 2, 1290);
       return new Promise(function (ok) { cv.toBlob(function (b) { ok({ blob: b, url: URL.createObjectURL(b) }); }, 'image/png'); });
     });
   }
@@ -834,6 +865,17 @@
       $('cardModal').hidden = false; sfx('open');
     }).catch(function () { $('cardTip').textContent = '카드를 그리지 못했어요. 다시 눌러 주세요'; })
       .then(function () { btn.disabled = false; btn.textContent = '💞 우리 궁합 카드 만들기'; });
+  });
+  $('rpWkCard').addEventListener('click', function () {
+    if (!last || !lastP || !lastMt || lastMt.kind !== 'wk') return;
+    var btn = this; btn.disabled = true; btn.textContent = '카드를 그리는 중…';
+    makeMtCard(last.input, lastP.input, last.result, lastP.result, lastMt).then(function (c) {
+      cardBlob = c.blob; cardName = 'byeolbit-team.png'; $('cardImg').src = c.url; $('cardTip').textContent = '';
+      var file = new File([c.blob], cardName, { type: 'image/png' });
+      $('cardShare').hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
+      $('cardModal').hidden = false; sfx('open');
+    }).catch(function () { $('cardTip').textContent = '카드를 그리지 못했어요. 다시 눌러 주세요'; })
+      .then(function () { btn.disabled = false; btn.textContent = '💼 우리 팀 카드 만들기'; });
   });
   var cardName = 'byeolbit-saju.png';
   $('rpNyCard').addEventListener('click', function () {
@@ -865,8 +907,8 @@
   });
   $('cardShare').addEventListener('click', function () {
     var file = new File([cardBlob], cardName, { type: 'image/png' });
-    var ny = cardName.indexOf('2027') >= 0, mt = cardName.indexOf('match') >= 0;
-    navigator.share({ files: [file], title: '별빛 사주', text: (mt ? '우리 궁합 나왔어 💞 ' : ny ? '내 2027 신년운세야 ✦ ' : '내 별자리 사주 카드야 ✦ ') + location.origin + location.pathname }).catch(function () { });
+    var ny = cardName.indexOf('2027') >= 0, mt = cardName.indexOf('match') >= 0, tm = cardName.indexOf('team') >= 0;
+    navigator.share({ files: [file], title: '별빛 사주', text: (tm ? '우리 일 궁합 나왔어 💼 ' : mt ? '우리 궁합 나왔어 💞 ' : ny ? '내 2027 신년운세야 ✦ ' : '내 별자리 사주 카드야 ✦ ') + location.origin + location.pathname }).catch(function () { });
   });
   $('lpClose').addEventListener('click', closeLucky);
   $('lpSkip').addEventListener('click', closeLucky);
