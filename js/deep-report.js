@@ -55,6 +55,21 @@
       H('더 빛나는 방향'), P(dm.growth)
     ]) });
 
+    // 겉 글자에는 없지만 땅속 글자(지장간)에 숨어 있을 때 덧붙이는 말
+    function hidList(list) {
+      var seen = {}, out = [];
+      (list || []).forEach(function (x) { var k = x.branch + x.stem; if (!seen[k]) { seen[k] = 1; out.push(x.branch + '(' + x.branchKo + ') 속의 ' + x.stem + '(' + x.stemKo + ')'); } });
+      return out.join(', ');
+    }
+    function hidNote(list, what) {
+      if (!list || !list.length) return null;
+      var lastKo = list[list.length - 1].stemKo, lc = lastKo.charCodeAt(0) - 0xac00, ro = (lc % 28 === 0 || lc % 28 === 8) ? '로' : '으로';
+      var hk = hidList(list); hidNote.seen = hidNote.seen || {};
+      if (hidNote.seen[hk]) return null; hidNote.seen[hk] = 1;
+      if (hidNote.used) return P('이 기운은 땅속 글자 ' + hidList(list) + ro + ' 조금 숨어 있어요.', 'tip');
+      hidNote.used = true;
+      return P('다만 겉으로 드러난 글자에 없을 뿐, 땅속에 숨은 글자(지장간)에는 ' + hidList(list) + ro + ' ' + what + '이 조금 숨어 있어요. 아주 없는 것이 아니라 조용히 품고 있다가, 운에서 같은 기운이 들어올 때 깨어나는 편이에요.', 'tip');
+    }
     // ---------- 2. 성격 깊이 보기 ----------
     var godsSorted = Object.keys(a.godCount).filter(function (k) { return a.godCount[k] > 0; })
       .sort(function (x, y) { return a.godCount[y] - a.godCount[x]; });
@@ -69,7 +84,7 @@
     godsSorted.slice(0, 3).forEach(function (k) {
       if (monthGod && k === monthGod.god) return;
       var t = g(D.tenGod, k); if (!t) return;
-      pb.push(H((a.godCount[k] >= 2 ? '여러 번 나오는 ' : '마음속에 있는 ') + t.name + ' — ' + t.easy));
+      pb.push(H((a.godCount[k] >= 2 ? '여러 번 나오는 ' : '함께 있는 ') + t.name + ' — ' + t.easy));
       pb.push(P(t.strong));
     });
     var shadowGod = godsSorted[0] && g(D.tenGod, godsSorted[0]);
@@ -78,7 +93,7 @@
       if (a.groupCount[gr] >= 3) { pb.push(H(GROUP_KO[gr] + '이 많아요')); pb.push(P(g(D.groupMany, gr))); }
     });
     ['bigeop', 'siksang', 'jaeseong', 'gwanseong', 'inseong'].forEach(function (gr) {
-      if (a.groupCount[gr] === 0) { pb.push(H(GROUP_KO[gr] + '이 사주에 없어요')); pb.push(P(g(D.groupNone, gr))); }
+      if (a.groupCount[gr] === 0) { pb.push(H(GROUP_KO[gr] + '이 겉으로 드러나지 않아요')); pb.push(P(g(D.groupNone, gr))); var hn = a.hidden && hidNote(a.hidden.groups[gr], '이 기운'); if (hn) pb.push(hn); }
     });
     pb.push(H('내 힘의 세기 — ' + (st.title || '')));
     pb.push(P(st.text)); pb.push(P(st.advice, 'tip'));
@@ -106,7 +121,8 @@
     if (gc.inseong >= 3) mk.push('manyInseong');
     // 재물 장이 너무 짧지 않게: 두 문단은 되도록
     if (mk.length < 2 && mk.indexOf('balanced') < 0) mk.push('balanced');
-    var mb = [P('사주에서 재물은 ‘' + GROUP_KO.jaeseong + '’으로 봐요. ' + nameJ + '의 여덟 글자에는 이 기운이 ' + (gc.jaeseong ? gc.jaeseong + '개' : '하나도 없') + (gc.jaeseong ? ' 있어요.' : '어요.'))];
+    var mb = [P('사주에서 재물은 ‘' + GROUP_KO.jaeseong + '’으로 봐요. ' + nameJ + '의 여덟 글자에는 이 기운이 ' + (gc.jaeseong ? gc.jaeseong + '개' : '겉으로 드러나 있지 않') + (gc.jaeseong ? ' 있어요.' : '아요.'))];
+    if (!gc.jaeseong && a.hidden) { var hm = hidNote(a.hidden.groups.jaeseong, '재물 기운'); if (hm) mb.push(hm); }
     mk.slice(0, 3).forEach(function (k) { mb.push(P(g(D.money, k))); });
     chapters.push({ id: 'money', title: '재물', sub: '돈을 버는 방식과 모으는 습관', blocks: clean(mb) });
 
@@ -164,7 +180,7 @@
     ['wood', 'fire', 'earth', 'metal', 'water'].forEach(function (e) {
       var c = r.elements[e], t = g(D.care, e); if (!t) return;
       if (c >= 3) { cb.push(H(ELK[e] + ' 기운이 넘쳐요 (' + c + '개)')); cb.push(P(t.many)); }
-      if (c === 0) { cb.push(H(ELK[e] + ' 기운이 비어 있어요')); cb.push(P(t.none)); }
+      if (c === 0) { cb.push(H(ELK[e] + ' 기운이 비어 있어요')); cb.push(P(t.none)); var he = a.hidden && hidNote(a.hidden.els[e], ELK[e] + ' 기운'); if (he) cb.push(he); }
     });
     if (!cb.length) cb.push(P('다섯 기운이 고르게 퍼져 있어요. 한쪽으로 치우친 습관만 조심하면, 지금 생활 리듬을 지키는 것이 가장 좋은 돌봄이에요.'));
     cb.push(P('이 내용은 생활 습관을 위한 참고예요. 몸이 불편하면 꼭 전문가와 상의해 주세요.', 'note'));

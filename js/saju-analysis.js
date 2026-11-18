@@ -222,6 +222,18 @@
     try { var ipc = E.jieList(thisYear).filter(function (j) { return j.name === '立春'; })[0]; if (ipc && now < ipc.ms) thisYear -= 1; } catch (e) { }
 
     // 짝이 되는 기운 (남: 재성, 여: 관성)
+    // ---- 땅속에 숨은 글자(지장간 여기·중기): 겉 글자에 없어도 숨어 있는 기운 ----
+    var hidden = { groups: {}, els: {} };
+    ['yB', 'mB', 'dB', 'hB'].forEach(function (k) {
+      var b = branches[k]; if (b === null || b === undefined) return;
+      var h = HIDDEN[b];
+      h.slice(0, h.length - 1).forEach(function (st) {
+        var item = { branch: C.BRANCHES[b], branchKo: C.BRANCHES_KO[b], stem: C.STEMS[st], stemKo: C.STEMS_KO[st] };
+        var gr = GROUP_OF[godOf(me, st)], el = EL[SE[st]];
+        (hidden.groups[gr] = hidden.groups[gr] || []).push(item);
+        (hidden.els[el] = hidden.els[el] || []).push(item);
+      });
+    });
     var partnerGroup = gender === 'M' ? 'jaeseong' : 'gwanseong';
     var pc = groupCount[partnerGroup];
 
@@ -234,6 +246,7 @@
       interactions: inter, sinsal: sinsal, unseong: unseong,
       daeun: { forward: forward, startAge: startAge, startAgeMonths: startAgeMonths, list: daeun },
       ageNow: ageNow, years: [yearInfo(thisYear), yearInfo(thisYear + 1)],
+      hidden: hidden,
       partner: { group: partnerGroup, state: pc === 0 ? 'none' : pc === 1 ? 'one' : 'many', count: pc },
       constants: { GOD_KO: GOD_KO, GROUP_KO: GROUP_KO, ELK: ELK, EL: EL }
     };
