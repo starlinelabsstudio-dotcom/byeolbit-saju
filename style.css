@@ -348,3 +348,34 @@ body.reading .sound-btn { display: none; }
 
 .li-dest { margin-top: 6px; font-size: 12.5px; color: var(--ink3); text-align: center; }
 #rpLink + .li-dest { text-align: left; }
+
+/* ---------- 2027 신년운세 (0.8.0) ---------- */
+.ny-go { margin-top: 10px; height: 50px; font-size: 16px; border-color: rgba(255, 224, 138, .55); color: #ffe08a; background: rgba(255, 224, 138, .08); }
+.ny-cta { text-align: center; padding: 22px 18px; background: linear-gradient(160deg, rgba(255, 150, 110, .22), rgba(255, 224, 138, .14)); border: 1.5px solid rgba(255, 210, 150, .55); }
+.ny-cta h3 { font-size: 22px; color: #fff; margin: 4px 0 8px; }
+.ny-cta > p { font-size: 15px; color: #f3ecff; margin-bottom: 14px; }
+.rp-mini:has(.ny-yp) { grid-template-columns: repeat(5, 1fr); }
+.rp-mini .ny-yp { background: rgba(255, 224, 138, .12); border-color: rgba(255, 224, 138, .6); }
+.ny-wave { margin: 14px 0 6px; padding: 10px 6px 8px; border-radius: 16px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .12); }
+.ny-wave svg { display: block; width: 100%; height: auto; }
+.ny-wave .ln { fill: none; stroke: #ffe08a; stroke-width: 2.4; filter: drop-shadow(0 0 4px rgba(255, 224, 138, .6)); }
+.ny-wave circle { fill: #ffe08a; }
+.ny-wave circle.h { fill: #5fe0a0; r: 5; }
+.ny-wave text { text-anchor: middle; font-family: inherit; }
+.ny-wave .mo { fill: #d6cdf2; font-size: 14px; }
+.ny-wave .st { fill: #5fe0a0; font-size: 14px; }
+.rp-ch .ny-wave-k { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; margin-top: 4px; font-size: calc(12.5px * var(--rs, 1)) !important; color: #c9bfe6; margin-bottom: 0; }
+.ny-mos { display: grid; gap: 10px; margin-top: 14px; }
+.ny-mo { padding: 14px 14px 12px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .13); }
+.ny-mo.help { border-color: rgba(95, 224, 160, .55); background: rgba(95, 224, 160, .07); }
+.ny-mo-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ny-mo-h b { font-size: calc(18px * var(--rs, 1)); color: #fff; }
+.ny-mo-h span { font-size: calc(12.5px * var(--rs, 1)); color: var(--ink3); }
+.ny-mo-h em { margin-left: auto; font-style: normal; font-family: var(--hanja); font-size: calc(14px * var(--rs, 1)); }
+.ny-mo .ny-flow { margin: 4px 0 6px; font-weight: 700; color: #ffe08a; }
+.ny-mo .ny-flow i { font-style: normal; font-weight: 400; font-size: .85em; color: #5fe0a0; margin-left: 4px; }
+.rp-ch .ny-mo .ny-tip { margin-top: 6px; color: #c9f5dc; }
+@media print { .ny-mo { break-inside: avoid; } }
+@media print { .ny-mo .ny-flow { color: #8a5a00 !important; } .ny-mo .ny-tip { color: #1f6b45 !important; } .ny-wave { display: none; } .ny-go, .ny-cta { display: none; } }
+.rp-back, .rp-size button { white-space: nowrap; }
+@media (max-width: 340px) { .rp-back { padding: 0 10px; font-size: 13px; } .rp-size button { padding: 8px 7px; font-size: 12px; } .rp-mini:has(.ny-yp) div { font-size: 22px; } }
