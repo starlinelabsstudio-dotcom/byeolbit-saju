@@ -379,3 +379,29 @@ body.reading .sound-btn { display: none; }
 @media print { .ny-mo .ny-flow { color: #8a5a00 !important; } .ny-mo .ny-tip { color: #1f6b45 !important; } .ny-wave { display: none; } .ny-go, .ny-cta { display: none; } }
 .rp-back, .rp-size button { white-space: nowrap; }
 @media (max-width: 340px) { .rp-back { padding: 0 10px; font-size: 13px; } .rp-size button { padding: 8px 7px; font-size: 12px; } .rp-mini:has(.ny-yp) div { font-size: 22px; } }
+
+/* ---------- 0.9.0 연애 궁합 ---------- */
+.mt-go { margin-top: 10px; height: 50px; font-size: 16px; border-color: rgba(255, 158, 192, .6); color: #ffc6d9; background: rgba(255, 158, 192, .08); }
+.mt-back { margin-top: 10px; }
+.mt-cta { text-align: center; padding: 22px 18px; background: linear-gradient(160deg, rgba(255, 120, 170, .22), rgba(190, 140, 255, .16)); border: 1.5px solid rgba(255, 170, 205, .55); }
+.mt-cta h3 { font-size: 22px; color: #fff; margin: 4px 0 8px; }
+.mt-cta > p { font-size: 15px; color: #f3ecff; margin-bottom: 14px; }
+.rp-mini.mt-pair { display: block; }
+.mt-row { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 8px; margin: 6px 0; }
+.mt-row .rp-mini { margin: 0; }
+.mt-who { font-size: 14px; color: #ffc6d9; text-align: center; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.3; }
+.mt-bars { margin: 12px 0 6px; }
+.mt-bar { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: center; margin: 7px 0; }
+.mt-bar .k { font-size: 14px; text-align: center; }
+.mt-bar .b { position: relative; height: 22px; border-radius: 11px; background: rgba(255, 255, 255, .07); overflow: hidden; }
+.mt-bar .b i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 11px; opacity: .85; }
+.mt-bar .b1 i { opacity: .55; }
+.mt-bar .b em { position: absolute; right: 8px; top: 0; line-height: 22px; font-style: normal; font-size: 13px; color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+.mt-bar i.wood { background: #5fe0a0; } .mt-bar i.fire { background: #ff7b7b; } .mt-bar i.earth { background: #f2c45a; } .mt-bar i.metal { background: #e3e9f5; } .mt-bar i.water { background: #6fb6ff; }
+.mt-bar-k { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; font-size: 13px; color: var(--ink2); text-align: center; }
+.mt-bar-k span:first-child { grid-column: 2; }
+@media print {
+  .mt-bar .b { background: #eee !important; }
+  .mt-bar .b em { color: #222 !important; }
+  .mt-who { color: #222 !important; }
+}

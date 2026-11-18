@@ -114,6 +114,31 @@
     opt($('fHour'), h, ap + ' ' + hh + '시', h === 12);
   }
   for (var mi = 0; mi < 60; mi++) opt($('fMin'), mi, mi + '분', mi === 0);
+  // 연애 궁합 상대 입력칸
+  for (var py = thisYear; py >= 1920; py--) opt($('pYear'), py, py + '년', py === 1995);
+  for (var pm = 1; pm <= 12; pm++) opt($('pMonth'), pm, pm + '월', pm === 1);
+  function fillPDays() {
+    var sel = $('pDay'), keep = +sel.value || 1;
+    var cal = document.querySelector('input[name=pcal]:checked').value;
+    var max = cal === 'lunar' ? 30 : new Date(+$('pYear').value, +$('pMonth').value, 0).getDate();
+    sel.innerHTML = '';
+    for (var d = 1; d <= max; d++) opt(sel, d, d + '일', d === Math.min(keep, max));
+  }
+  fillPDays();
+  for (var ph = 0; ph < 24; ph++) opt($('pHour'), ph, (ph < 12 ? '오전 ' : '오후 ') + (ph % 12 === 0 ? 12 : ph % 12) + '시', ph === 12);
+  for (var pmi = 0; pmi < 60; pmi++) opt($('pMin'), pmi, pmi + '분', pmi === 0);
+  $('pYear').addEventListener('change', fillPDays);
+  $('pMonth').addEventListener('change', fillPDays);
+  document.querySelectorAll('input[name=pcal]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      $('pLeapWrap').hidden = r.value !== 'lunar' || !r.checked;
+      if (r.value === 'solar' && r.checked) $('pLeap').checked = false;
+      fillPDays();
+    });
+  });
+  $('pNoTime').addEventListener('change', function () { $('pTimeRow').hidden = this.checked; });
+  $('mtForm').addEventListener('input', function () { $('mtErr').textContent = ''; });
+
   // 태어난 곳: 적는 즉시 어디로 알아들었는지 보여 준다
   function showPlace() {
     var r = window.SajuPlaces.resolve($('fPlace').value), h = $('fPlaceHint');
@@ -178,6 +203,7 @@
 
   $('form').addEventListener('submit', function (ev) { ev.preventDefault(); runForm(false); });
   $('btnNyForm').addEventListener('click', function () { runForm(true); });
+  $('btnMtForm').addEventListener('click', function () { runForm('mt'); });
   function runForm(ny) {
     var input = readForm();
     // 태어난 곳은 꼭 넣어야 한다 (모르면 도·광역시만이라도)
@@ -188,6 +214,8 @@
     catch (e) { $('formErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
     try { localStorage.setItem(STORE_KEY, JSON.stringify(input)); } catch (e) { }
     last = { input: input, result: result };
+    if (ny === 'mt') { mtFrom = 'input'; resultShown = false; openMatch(); return; }
+    resultShown = true;
     if (ny) { $('gatherText').textContent = '2027년의 별을 모으고 있어요…'; gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showResult(input, result, true); showNewYear(); }); return; }
     gather(function () { showResult(input, result); });
   }
@@ -360,7 +388,7 @@
   }
   $('btnAgain').addEventListener('click', function () { goInput(false); });
   $('btnFriend').addEventListener('click', function () { goInput(true); $('fName').focus(); });
-  $('homeLink').addEventListener('click', function (e) { e.preventDefault(); document.body.classList.remove('reading'); $('viewReport').hidden = true; goInput(false); });
+  $('homeLink').addEventListener('click', function (e) { e.preventDefault(); document.body.classList.remove('reading'); $('viewReport').hidden = true; $('viewMatch').hidden = true; goInput(false); });
   // ---------- 깊은 감정서 ----------
   var SIZE_KEY = 'byeolbit-saju-size';
   function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -378,6 +406,14 @@
     if (b.list) return '<p class="rp-label">' + esc(b.label) + '</p><ul class="rp-ul">' + b.list.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>';
     if (b.timeline) return '<div class="rp-tl">' + b.timeline.map(function (t) { return '<div class="' + (t.current ? 'cur' : '') + '"><span>' + esc(t.age) + '<br><small>' + esc(t.year) + '</small></span><b class="' + t.el + '">' + esc(t.pillar) + '</b><span>' + esc(t.title) + '</span></div>'; }).join('') + '</div>';
     if (b.wave) return waveSvg(b.wave);
+    if (b.bars) {
+      var mx = 1; b.bars.forEach(function (x) { EL_ORDER.forEach(function (e) { mx = Math.max(mx, x.el[e]); }); });
+      return '<div class="mt-bars">' + EL_ORDER.map(function (e) {
+        return '<div class="mt-bar"><span class="k ' + e + '">' + EL_KO[e] + '</span>' + b.bars.map(function (x, i) {
+          return '<span class="b b' + i + '"><i class="' + e + '" style="width:' + Math.max(4, x.el[e] / mx * 100) + '%"></i><em>' + x.el[e] + '</em></span>';
+        }).join('') + '</div>';
+      }).join('') + '<p class="mt-bar-k">' + b.bars.map(function (x, i) { return '<span class="b' + i + '">' + esc(x.name) + '</span>'; }).join('') + '</p></div>';
+    }
     if (b.months) return '<div class="ny-mos">' + b.months.map(function (m) {
       return '<div class="ny-mo' + (m.help ? ' help' : '') + '"><div class="ny-mo-h"><b>' + esc(m.label) + '</b><span>' + esc(m.range) + '</span><em class="' + m.pillar.stemElement + '">' + esc(m.pillar.ko) + ' ' + m.pillar.hanja + '</em></div>' +
         '<p class="ny-flow">' + esc(m.flow) + (m.help ? ' <i>★ 힘이 나는 달</i>' : '') + '</p><p>' + esc(m.text) + '</p><p class="ny-tip">✓ ' + esc(m.tip) + '</p></div>';
@@ -420,8 +456,10 @@
   var rpMode = 'deep', RP_HOW = null;
   function setRpHead(mode) {
     if (RP_HOW === null) RP_HOW = $('rpHow').textContent;
-    $('rpPill').textContent = mode === 'ny' ? '🎍 별빛 2027 신년운세' : '✦ 별빛 깊은 감정서';
-    $('rpHow').textContent = mode === 'ny' ? '이 신년운세는 내 사주 여덟 글자와 2027년 정미년, 그리고 절기로 바뀌는 열두 달의 글자를 명리학의 규칙(십신·합충·신살·대운)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요.' : RP_HOW;
+    $('rpPill').textContent = mode === 'ny' ? '🎍 별빛 2027 신년운세' : mode === 'mt' ? '💞 별빛 연애 궁합' : '✦ 별빛 깊은 감정서';
+    $('rpPillars').className = 'rp-mini';
+    $('rpMtCard').hidden = $('rpMtAgain').hidden = mode !== 'mt';
+    $('rpHow').textContent = mode === 'mt' ? '이 궁합은 두 사람의 사주 글자를 명리학의 규칙(천간합·오행의 상생상극·지지의 합충형·원진·십신)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 성별은 계산에 쓰지 않아요.' : mode === 'ny' ? '이 신년운세는 내 사주 여덟 글자와 2027년 정미년, 그리고 절기로 바뀌는 열두 달의 글자를 명리학의 규칙(십신·합충·신살·대운)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요.' : RP_HOW;
     $('rpNyCard').hidden = mode !== 'ny';
   }
   function waveSvg(ms) {
@@ -475,6 +513,83 @@
     $('gatherText').textContent = '2027년의 별을 모으고 있어요…';
     gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showNewYear(); });
   });
+
+  // ---------- 연애 궁합 ----------
+  var P_KEY = 'byeolbit-saju-partner', mtFrom = 'result', resultShown = false, lastMt = null, lastP = null;
+  function openMatch() {
+    var me = last.input;
+    $('mtMe').textContent = '나: ' + (me.name ? me.name + ' · ' : '') + me.year + '.' + me.month + '.' + me.day + (me.calendar === 'lunar' ? ' (음력)' : '') + ' · ' + last.result.pillars.day.ko + '일주';
+    try {
+      var s = JSON.parse(localStorage.getItem(P_KEY) || 'null');
+      if (s) {
+        $('pName').value = s.name || '';
+        document.querySelector('input[name=pcal][value=' + (s.calendar === 'lunar' ? 'lunar' : 'solar') + ']').checked = true;
+        $('pLeapWrap').hidden = s.calendar !== 'lunar'; $('pLeap').checked = !!s.leap;
+        $('pYear').value = s.year; $('pMonth').value = s.month; fillPDays(); $('pDay').value = s.day;
+        $('pNoTime').checked = s.hour == null; $('pTimeRow').hidden = s.hour == null;
+        if (s.hour != null) { $('pHour').value = s.hour; $('pMin').value = s.minute; }
+      }
+    } catch (e) { }
+    $('mtErr').textContent = '';
+    document.body.classList.remove('reading');
+    $('viewInput').hidden = true; $('viewResult').hidden = true; $('viewReport').hidden = true; $('viewMatch').hidden = false; scrollTo(0, 0);
+  }
+  $('btnMt').addEventListener('click', function () { if (!last) return; mtFrom = 'result'; openMatch(); });
+  $('rpMtAgain').addEventListener('click', function () { if (!last) return; mtFrom = resultShown ? 'result' : 'input'; $('pName').value = ''; try { localStorage.removeItem(P_KEY); } catch (e) { } openMatch(); });
+  $('mtBack').addEventListener('click', function () {
+    $('viewMatch').hidden = true;
+    if (mtFrom === 'input' || !resultShown) $('viewInput').hidden = false; else { $('viewResult').hidden = false; }
+    scrollTo(0, 0);
+  });
+  $('mtForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (!last) return;
+    var noTime = $('pNoTime').checked;
+    var pin = { name: $('pName').value.trim(), calendar: document.querySelector('input[name=pcal]:checked').value, leap: $('pLeap').checked,
+      year: +$('pYear').value, month: +$('pMonth').value, day: +$('pDay').value, hour: noTime ? null : +$('pHour').value, minute: noTime ? null : +$('pMin').value };
+    var pr;
+    try { pr = E.calculate(pin); } catch (e) { $('mtErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
+    try { localStorage.setItem(P_KEY, JSON.stringify(pin)); } catch (e) { }
+    lastP = { input: pin, result: pr };
+    $('gatherText').textContent = '두 사람의 별을 잇고 있어요…';
+    gather(function () {
+      $('gatherText').textContent = '별을 모으고 있어요…';
+      if (!resultShown) { showResult(last.input, last.result, true); resultShown = true; }
+      showMatch();
+    });
+  });
+  function pillRow(r) {
+    return '<div class="rp-mini">' + ['hour', 'day', 'month', 'year'].map(function (k) {
+      var p = r.pillars[k], lab = { hour: '시', day: '일', month: '월', year: '년' }[k];
+      return '<div class="' + (k === 'day' ? 'me' : '') + '"><span class="' + (p ? p.stemElement : '') + '">' + (p ? p.stemHanja : '?') + '</span><br><span class="' + (p ? p.branchElement : '') + '">' + (p ? p.branchHanja : '?') + '</span><small>' + lab + '</small></div>';
+    }).join('') + '</div>';
+  }
+  function showMatch() {
+    if (!last || !lastP) return;
+    var rep = window.Match.build(last.result, last.input, lastP.result, lastP.input);
+    lastMt = rep; rpMode = 'mt'; setRpHead('mt');
+    var meName = last.input.name || '나';
+    $('rpTitle').textContent = meName + ' 💞 ' + (lastP.input.name || '상대');
+    $('rpSub').textContent = '연애 궁합 · ' + rep.name;
+    $('rpPillars').className = 'rp-mini mt-pair';
+    $('rpPillars').innerHTML = '<div class="mt-row"><p class="mt-who">' + esc(meName) + '</p>' + pillRow(last.result) + '</div><div class="mt-row"><p class="mt-who">' + esc(lastP.input.name || '상대') + '</p>' + pillRow(lastP.result) + '</div>';
+    $('rpSummary').innerHTML = rep.summary.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
+    $('rpToc').innerHTML = rep.chapters.map(function (c, i) { return '<a href="#ch-' + c.id + '">' + (i + 1) + '. ' + esc(c.title) + '</a>'; }).join('');
+    $('rpBody').innerHTML = rep.chapters.map(function (c, i) {
+      return '<article class="glass card rp-ch" id="ch-' + c.id + '"><p class="no">' + (i + 1) + ' / ' + rep.chapters.length + '</p><h3>' + esc(c.title) + '</h3><p class="chsub">' + esc(c.sub) + '</p>' + c.blocks.map(renderBlock).join('') + '</article>';
+    }).join('');
+    $('rpBody').parentNode.insertBefore($('rpLucky'), $('rpDonate'));
+    if (luckyToday) { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
+    var DN = window.SAJU_LUCKY && window.SAJU_LUCKY.DONATE, donOn = !!(DN && DN.enabled && (DN.toss || DN.kakao));
+    $('rpDonate').hidden = !donOn;
+    var sz = '1'; try { sz = localStorage.getItem(SIZE_KEY) || '1'; } catch (e) { }
+    setSize(sz);
+    $('viewInput').hidden = true; $('viewMatch').hidden = true; $('viewResult').hidden = true; $('viewReport').hidden = false; scrollTo(0, 0);
+    document.body.classList.add('reading');
+    var chs = document.querySelectorAll('#viewReport .rp-ch');
+    chs.forEach(function (c, i) { c.classList.add('reveal'); setTimeout(function () { c.classList.add('in'); }, 200 + i * 120); });
+    window.__lastMtChars = rep.chars;
+  }
 
   // ---------- 감정서 기다림: 동그란 진행률 + 읽는 법 카드 ----------
   var DW_CARDS = [
@@ -555,7 +670,7 @@
     }
     sfx('open'); deepWait();
   });
-  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewReport').hidden = true; $('viewResult').hidden = false; $(rpMode === 'ny' ? 'rNyCta' : 'rDeepCta').scrollIntoView(); });
+  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewMatch').hidden = true; $('viewInput').hidden = true; $('viewReport').hidden = true; $('viewResult').hidden = false; $(rpMode === 'ny' ? 'rNyCta' : rpMode === 'mt' ? 'rMtCta' : 'rDeepCta').scrollIntoView(); });
   $('rpTop').addEventListener('click', function () { scrollTo(0, 0); });
   $('rpPrint').addEventListener('click', function () { var v = $('viewReport').style.getPropertyValue('--rs'); window.print(); });
   $('rpPrintBig').addEventListener('click', function () {
@@ -677,6 +792,49 @@
       return new Promise(function (ok) { cv.toBlob(function (b) { ok({ blob: b, url: URL.createObjectURL(b) }); }, 'image/png'); });
     });
   }
+  function makeMtCard(meIn, pIn, rA, rB, rep) {
+    var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var g = cv.getContext('2d');
+    return Promise.all([loadImg('img/sky.jpg'), document.fonts.load('700 60px "Gowun Batang"'), document.fonts.load('100px "Song Myung"'), document.fonts.load('40px "Gowun Dodum"')]).then(function (res) {
+      g.fillStyle = '#120a2e'; g.fillRect(0, 0, W, H);
+      g.globalAlpha = .75; cover(g, res[0], 0, 0, W, H); g.globalAlpha = 1;
+      var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(40,10,46,.35)'); gr.addColorStop(1, 'rgba(18,10,46,.92)');
+      g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      for (var i = 0; i < 140; i++) { g.globalAlpha = Math.random() * .8 + .2; g.fillStyle = Math.random() < .25 ? '#ffc6d9' : '#fff'; g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() * 2.2 + .4, 0, 6.283); g.fill(); }
+      g.globalAlpha = 1; g.textAlign = 'center';
+      g.fillStyle = '#ffe08a'; g.font = '700 38px "Gowun Batang"'; g.fillText('✦ 별빛 사주 · 연애 궁합', W / 2, 96);
+      var nA = meIn.name || '나', nB = pIn.name || '상대';
+      // 두 사람의 일주
+      [[rA, nA, W / 2 - 230], [rB, nB, W / 2 + 230]].forEach(function (x) {
+        var p = x[0].pillars.day, cx = x[2];
+        roundRect(g, cx - 150, 170, 300, 420, 36); g.fillStyle = 'rgba(255,255,255,.08)'; g.fill(); g.lineWidth = 2; g.strokeStyle = 'rgba(255,200,220,.45)'; g.stroke();
+        g.fillStyle = '#f3ecff'; g.font = '700 44px "Gowun Batang"'; g.fillText(x[1].length > 6 ? x[1].slice(0, 6) + '…' : x[1], cx, 236);
+        g.font = '150px "Song Myung"';
+        [[p.stemHanja, COL[p.stemElement], 400], [p.branchHanja, COL[p.branchElement], 550]].forEach(function (c) { g.fillStyle = c[1]; g.shadowColor = c[1]; g.shadowBlur = 30; g.fillText(c[0], cx, c[2]); g.shadowBlur = 0; });
+      });
+      g.font = '110px "Gowun Dodum"'; g.fillStyle = '#ff9ec0'; g.shadowColor = '#ff9ec0'; g.shadowBlur = 30; g.fillText('♥', W / 2, 420); g.shadowBlur = 0;
+      g.fillStyle = '#ffe08a'; g.font = '700 64px "Gowun Batang"'; g.fillText('“' + rep.name + '”', W / 2, 740);
+      g.fillStyle = '#f3ecff'; g.font = '42px "Gowun Dodum"'; g.fillText(rep.keywords.map(function (k) { return '#' + k; }).join('   '), W / 2, 830);
+      g.fillStyle = '#c9bfe6'; g.font = '34px "Gowun Dodum"';
+      wrapText(g, rep.summary[1].replace('기본 결: ', ''), W / 2, 930, W - 200, 50, 2);
+      wrapText(g, rep.summary[2].replace('함께 있을 때: ', '함께 있으면 · '), W / 2, 1040, W - 200, 50, 2);
+      g.fillStyle = '#c9bfe6'; g.font = '32px "Gowun Dodum"';
+      var addr = (location.host + location.pathname).replace(/^www\./, '').replace(/index\.html$/, '').replace(/\/$/, '');
+      g.fillText('우리 궁합 보기 → ' + addr, W / 2, 1290);
+      return new Promise(function (ok) { cv.toBlob(function (b) { ok({ blob: b, url: URL.createObjectURL(b) }); }, 'image/png'); });
+    });
+  }
+  $('rpMtCard').addEventListener('click', function () {
+    if (!last || !lastP || !lastMt) return;
+    var btn = this; btn.disabled = true; btn.textContent = '카드를 그리는 중…';
+    makeMtCard(last.input, lastP.input, last.result, lastP.result, lastMt).then(function (c) {
+      cardBlob = c.blob; cardName = 'byeolbit-match.png'; $('cardImg').src = c.url; $('cardTip').textContent = '';
+      var file = new File([c.blob], cardName, { type: 'image/png' });
+      $('cardShare').hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
+      $('cardModal').hidden = false; sfx('open');
+    }).catch(function () { $('cardTip').textContent = '카드를 그리지 못했어요. 다시 눌러 주세요'; })
+      .then(function () { btn.disabled = false; btn.textContent = '💞 우리 궁합 카드 만들기'; });
+  });
   var cardName = 'byeolbit-saju.png';
   $('rpNyCard').addEventListener('click', function () {
     if (!last || !lastNy) return;
@@ -707,8 +865,8 @@
   });
   $('cardShare').addEventListener('click', function () {
     var file = new File([cardBlob], cardName, { type: 'image/png' });
-    var ny = cardName.indexOf('2027') >= 0;
-    navigator.share({ files: [file], title: '별빛 사주', text: (ny ? '내 2027 신년운세야 ✦ ' : '내 별자리 사주 카드야 ✦ ') + location.origin + location.pathname }).catch(function () { });
+    var ny = cardName.indexOf('2027') >= 0, mt = cardName.indexOf('match') >= 0;
+    navigator.share({ files: [file], title: '별빛 사주', text: (mt ? '우리 궁합 나왔어 💞 ' : ny ? '내 2027 신년운세야 ✦ ' : '내 별자리 사주 카드야 ✦ ') + location.origin + location.pathname }).catch(function () { });
   });
   $('lpClose').addEventListener('click', closeLucky);
   $('lpSkip').addEventListener('click', closeLucky);
