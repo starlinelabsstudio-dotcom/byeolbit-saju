@@ -475,3 +475,4 @@ body.reading .sound-btn { display: none; }
 @media (max-width: 300px) { .td-todo { grid-template-columns: 1fr; } .td-week i { font-size: 18px; } }
 @media print { .td-wx-row, .td-todo div, .td-week div, .td-tmw, .td-hours span { background: #f5f2fb !important; border-color: #ddd !important; color: #222 !important; } .td-say, .td-bye, .td-flow span { color: #8a6a00 !important; } }
 .td-week-k span { white-space: nowrap; }
+.rp-lucky .sw { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; box-shadow: 0 0 8px currentColor; border: 1px solid rgba(255,255,255,.4); }

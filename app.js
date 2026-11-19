@@ -212,7 +212,7 @@
     var result;
     try { result = E.calculate(input); }
     catch (e) { $('formErr').textContent = e.message || '날짜를 다시 확인해 주세요'; return; }
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(input)); } catch (e) { }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(input)); } catch (e) { } initTdBack();
     last = { input: input, result: result };
     if (ny === 'mt') { mtFrom = 'input'; resultShown = false; openMatch(); return; }
     resultShown = true;
@@ -333,7 +333,7 @@
       '<a class="ilju-more" href="ilju/' + SLUG_S[r.pillars.day.stem] + SLUG_B[r.pillars.day.branch] + '.html">' + r.pillars.day.ko + '일주 더 알아보기 · 60일주 모아보기 →</a>';
 
     // 오늘의 운세
-    var td = seoulToday(), tp = E.dayPillarOf(td.y, td.m, td.d);
+    var td = seoulToday(), tp = E.dayPillarOf(td.y, td.m, td.d); resultDay = td.y + '-' + td.m + '-' + td.d;
     var rel = relation(dm.stem, tp.stem), tt = (T.today || {})[rel] || {};
     var seed = hash(td.y + '-' + td.m + '-' + td.d + '|' + r.pillars.day.hanja + '|' + (r.pillars.hour ? r.pillars.hour.hanja : ''));
     $('rTodayDate').textContent = td.m + '월 ' + td.d + '일 · 오늘은 ' + tp.ko + '일';
@@ -435,7 +435,7 @@
     if (b.week) return '<div class="td-week">' + b.week.map(function (w, i) {
       return '<div class="' + (i === 0 ? 'now ' : '') + w.wx + '"><span>' + esc(w.label) + '</span><i aria-label="' + ({ sun: '맑음', part: '구름 조금', cloud: '흐림' }[w.wx]) + '">' + w.icon + '</i><small>' + esc(w.md) + '</small></div>';
     }).join('') + '</div><p class="td-week-k"><span>☀ 맑음</span> · <span>⛅ 구름 조금</span> · <span>☁ 흐림</span></p>';
-    if (b.lucky) return '<div class="rp-lucky">' + b.lucky.map(function (l) { return '<div><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join('') + '</div>';
+    if (b.lucky) return '<div class="rp-lucky">' + b.lucky.map(function (l) { return '<div><span>' + esc(l[0]) + '</span><b>' + (l[2] ? '<i class="sw" style="background:' + l[2] + '"></i>' : '') + esc(l[1]) + '</b></div>'; }).join('') + '</div>';
     return '';
   }
   function showReport() {
@@ -542,7 +542,7 @@
   });
 
   // ---------- 오늘의 운세 (0.11) ----------
-  var lastTd = null;
+  var lastTd = null, resultDay = '';
   function showToday() {
     if (!last) return;
     var input = last.input, r = last.result;
@@ -559,8 +559,8 @@
     var chs = [
       { id: 'td-wx', title: '오늘의 날씨', sub: '일 · 돈 · 사랑 · 사람 · 몸', blocks: [{ chips: rep.kw.map(function (k) { return '#' + k; }), label: '오늘의 낱말' }, { wx: rep.areas }] },
       { id: 'td-flow', title: '오늘의 흐름', sub: '아침 · 낮 · 저녁, 그리고 좋은 시간', blocks: [{ flow: rep.flow }].concat(rep.hours.length ? [{ hours: rep.hours, text: rep.hourText }] : []) },
-      { id: 'td-about', title: '오늘 글자 풀이', sub: '오늘 날 글자와 내 글자의 만남', blocks: [{ p: rep.about }, { p: rep.month }, { say: rep.saying }] },
-      { id: 'td-lucky', title: '오늘의 행운', sub: '나를 돕는 작은 것들', blocks: [{ lucky: rep.lucky }, { todo: [rep.todo, rep.rest] }] },
+      { id: 'td-about', title: '오늘 글자 풀이', sub: '오늘 날 글자와 내 글자의 만남', blocks: [{ p: rep.about }, { p: rep.unLine }, { p: rep.month }, { say: rep.saying }] },
+      { id: 'td-lucky', title: '오늘의 행운', sub: '나를 돕는 작은 것들', blocks: [{ lucky: rep.lucky.map(function (l, i) { return i === 0 && rep.luckyHex ? [l[0], l[1], rep.luckyHex] : l; }) }, { todo: [rep.todo, rep.rest] }] },
       { id: 'td-week', title: '이번 주 날씨', sub: '오늘부터 7일', blocks: [{ week: rep.week }, { p: rep.tomorrow, cls: 'td-tmw' }, { p: '내일 또 봐요 ☾', cls: 'td-bye' }] }
     ];
     $('rpToc').innerHTML = '';
@@ -614,6 +614,18 @@
     $('tdBack').hidden = true;
   });
   initTdBack();
+  // 열어 둔 창을 다음 날 다시 보면 새 날짜로 바꿔 준다 (매일 다시 보는 기능의 핵심)
+  function dayKey(t) { return t.y + '-' + t.m + '-' + t.d; }
+  function refreshIfNewDay() {
+    if (document.hidden) return;
+    var k = dayKey(seoulToday());
+    if (!$('viewInput').hidden) initTdBack();
+    if (!last) return;
+    if (rpMode === 'td' && !$('viewReport').hidden && lastTd && dayKey(lastTd.date) !== k) { showResult(last.input, last.result, true); showToday(); }
+    else if (!$('viewResult').hidden && resultDay && resultDay !== k) showResult(last.input, last.result, true);
+  }
+  document.addEventListener('visibilitychange', refreshIfNewDay);
+  window.addEventListener('focus', refreshIfNewDay);
 
   // ---------- 궁합 (연애 · 속궁합 · 일 궁합) ----------
   var MK_LABEL = { mt: '💞 연애 궁합 보기', sk: '💗 속궁합 보기', wk: '💼 일 궁합 보기' };

@@ -19,7 +19,7 @@
   var BR_PUNISH = { '2-5': 1, '5-8': 1, '2-8': 1, '1-10': 1, '7-10': 1, '1-7': 1, '0-3': 1 };
   var WONJIN = { '0-7': 1, '1-6': 1, '2-9': 1, '3-8': 1, '4-11': 1, '5-10': 1 };
   var TRIPLE = [[8, 0, 4], [2, 6, 10], [5, 9, 1], [11, 3, 7]];
-  var HIDDEN_MAIN = [9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8]; // 지지의 본기 천간
+  var HIDDEN_MAIN = A.HIDDEN.map(function (h) { return h[h.length - 1]; }); // 지지의 본기 천간 (분석 모듈의 지장간 표에서)
   var AREAS = ['work', 'money', 'love', 'people', 'body'];
   var AREA_KO = { work: '일', money: '돈', love: '사랑', people: '사람', body: '몸' };
   // 오늘 날 글자 무리가 갈래마다 주는 기운
@@ -92,7 +92,10 @@
     if (!AREAS.some(function (k) { return lv[k] === 2; })) {
       var best = AREAS.slice().sort(function (x, y) { return s[y] - s[x]; })[0]; lv[best] = 2;
     }
-    var avg = sum / 5, overall = avg >= 0.6 ? 2 : avg <= -0.1 ? 0 : 1;
+    // 하루 전체 날씨는 다섯 칸 그림과 어긋나지 않게 칸 수로 정한다
+    var nSun = 0, nCloud = 0;
+    AREAS.forEach(function (k) { if (lv[k] === 2) nSun++; if (lv[k] === 0) nCloud++; });
+    var overall = nCloud >= 2 ? 0 : (nCloud === 0 && nSun >= 3) || nSun >= 4 ? 2 : 1;
     return { pillar: tp, god: god, grp: grp, bgrp: bgrp, help: help, wind: wind, mwind: mwind, s: s, lv: lv, overall: overall, no: dayNo(ymd.y, ymd.m, ymd.d) };
   }
 
@@ -116,7 +119,12 @@
     }
     six.concat(tri).forEach(function (b) { if (out.length < 2 && !BR_CLASH[pk(b, tp.branch)]) out.push({ b: b, why: six.indexOf(b) >= 0 ? 'six' : 'tri' }); });
     if (out.length < 2) for (var x = 4; x <= 11 && out.length < 2; x++) {
-      if (EL[BE[x]] === a.helper && x !== db && !BR_CLASH[pk(x, db)] && !out.some(function (o) { return o.b === x; })) out.push({ b: x, why: 'help' });
+      if (EL[BE[x]] === a.helper && x !== db && !BR_CLASH[pk(x, db)] && !BR_CLASH[pk(x, tp.branch)] && !out.some(function (o) { return o.b === x; })) out.push({ b: x, why: 'help' });
+    }
+    // 그래도 없으면 내 일지·오늘 날과 부딪치지 않는 잔잔한 시간 하나
+    if (!out.length) for (var z = 4; z <= 11 && !out.length; z++) {
+      var kz = pk(z, db);
+      if (z !== db && !BR_CLASH[kz] && !BR_PUNISH[kz] && !WONJIN[kz] && !BR_CLASH[pk(z, tp.branch)]) out.push({ b: z, why: 'calm' });
     }
     out.sort(function (p, q) { return p.b - q.b; });
     return out.map(function (o) {
@@ -147,6 +155,8 @@
     });
     var about = fill(T.aboutDay, o) + ' ' + fill(pick(T.godMean[sc.god], sCyc), o);
     var saying = pick(T.saying[sc.god], sCyc);
+    var un = A.unseongOf(me.stem, tp.branch);
+    var unLine = '오늘 땅 글자 ' + tp.branchKo + '(' + tp.branchHanja + ')' + (bat(tp.branchKo) ? '은' : '는') + ' 내 일간에게 ' + pick(T.unseong[un.key], bCyc);
     var bestA = AREAS.slice().sort(function (x, y) { return sc.s[y] - sc.s[x]; })[0];
     var low = AREAS.filter(function (k) { return sc.lv[k] === 0; });
     var sumLine2 = low.length
@@ -165,10 +175,10 @@
       { when: '낮', text: fill(noon, o) },
       { when: '저녁', text: fill(pick(T.flow[sc.grp].pm, vg + 1), o) }
     ];
-    var month = fill(pick(T.month[mgrp], ymd.m), o);
+    var month = fill(pick(T.month[mgrp], mp.branch), o);
     var lk = luckyOf(r, ymd), lc = (T.color || {})[lk.el] || { name: ELK[lk.el] };
     var hours = hoursOf(r, a, tp);
-    var hwhy = ['six', 'tri', 'help'].filter(function (w) { return hours.some(function (h) { return h.why === w; }); })[0];
+    var hwhy = ['six', 'tri', 'help', 'calm'].filter(function (w) { return hours.some(function (h) { return h.why === w; }); })[0];
     var hourText = hours.length ? fill(pick(T.hourWhy[hwhy], no), { H: hours.map(function (h) { return h.ko; }).join('·') }) : '';
     var lucky = [['행운의 색', lc.name], ['행운의 숫자', String(lk.num)], ['행운의 방향', DIR[lk.el]], ['오늘 가까이할 기운', ELK[a.helper] + ' 기운']];
     var todo = pick(T.todo[sc.god], sCyc), rest = pick(T.rest[sc.god], sCyc + 1);
@@ -179,13 +189,13 @@
       week.push({ label: i === 0 ? '오늘' : i === 1 ? '내일' : DOW[dw], md: dd.m + '.' + dd.d, wx: WX[s2.overall], icon: WX_ICON[WX[s2.overall]], ko: E.dayPillarOf(dd.y, dd.m, dd.d).ko });
     }
     var tmw = score(r, a, addDays(ymd, 1));
-    var tomorrow = fill(pick(T.tease[tmw.god], Math.floor((ix + 1) / 10)), o);
+    var tomorrow = fill(pick(T.tease[tmw.god], Math.floor((ix + 1) / 10)), o) + (tmw.overall === 0 ? ' ' + pick(T.teaseCloud, ix) : '');
     var title = gt.title;
     var chars = summary.join('').length + areas.reduce(function (n, x) { return n + x.text.length; }, 0) + flow.reduce(function (n, x) { return n + x.text.length; }, 0) +
-      about.length + saying.length + month.length + hourText.length + todo.length + rest.length + tomorrow.length;
+      about.length + unLine.length + saying.length + month.length + hourText.length + todo.length + rest.length + tomorrow.length;
     return {
       kind: 'td', date: ymd, dow: DOW[new Date(Date.UTC(ymd.y, ymd.m - 1, ymd.d)).getUTCDay()], pillar: tp, monthPillar: mp, god: sc.god, grp: sc.grp, wind: sc.wind, help: sc.help,
-      title: title, kw: gt.kw, summary: summary, about: about, saying: saying, month: month, areas: areas, flow: flow, hours: hours, hourText: hourText,
+      title: title, kw: gt.kw, summary: summary, about: about, unLine: unLine, unseong: un.ko, saying: saying, month: month, areas: areas, flow: flow, hours: hours, hourText: hourText,
       lucky: lucky, luckyEl: lk.el, luckyHex: lc.hex, todo: todo, rest: rest, week: week, tomorrow: tomorrow, overall: WX[sc.overall], chars: chars, s: sc.s
     };
   }
