@@ -511,3 +511,9 @@ body.reading .sound-btn { display: none; }
 .td-cal-pick .nw, .td-cal-sum b { white-space: nowrap; }
 @media (max-width: 300px) { .td-cal-d i { font-size: 16px; } .td-cal-d small { font-size: 10px; } .td-cal, .td-cal-dow { gap: 3px; } }
 @media print { .td-cal-btn { display: none; } }
+
+/* 0.14.1 첫 화면 버튼에 볼 수 있는 것 한 줄 */
+.go2 { height: auto; min-height: 54px; padding: 10px 12px; line-height: 1.35; }
+.go-sub { display: block; margin-top: 3px; font-size: 12.5px; font-weight: 400; opacity: .82; word-break: keep-all; }
+.btn-main.go2 .go-sub { color: #3a2050; }
+.go-sub i { font-style: normal; white-space: nowrap; }
