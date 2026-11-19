@@ -422,9 +422,19 @@
       return '<div class="sk-temp"><span class="who">' + esc(t.name) + '</span><span class="track"><i class="' + t.cls + '" style="left:' + x.toFixed(1) + '%"></i></span><span class="tv">' + ({ warm: '따뜻함', mild: '알맞음', cool: '시원함' }[t.cls]) + '</span></div>';
     }).join('') + '<p class="sk-temp-k"><span>❄ 시원함</span><span>따뜻함 ☀</span></p></div>';
     if (b.months) return '<div class="ny-mos">' + b.months.map(function (m) {
-      return '<div class="ny-mo' + (m.help ? ' help' : '') + '"><div class="ny-mo-h"><b>' + esc(m.label) + '</b><span>' + esc(m.range) + '</span><em class="' + m.pillar.stemElement + '">' + esc(m.pillar.ko) + ' ' + m.pillar.hanja + '</em></div>' +
-        '<p class="ny-flow">' + esc(m.flow) + (m.help ? ' <i>★ 힘이 나는 달</i>' : '') + '</p><p>' + esc(m.text) + '</p><p class="ny-tip">✓ ' + esc(m.tip) + '</p></div>';
+      return '<div class="ny-mo ' + (m.wx || '') + (m.help ? ' help' : '') + '"><div class="ny-mo-h"><b>' + esc(m.label) + '</b>' + (m.wx ? '<span class="ny-wx ' + m.wx + '">' + m.icon + ' ' + esc(m.wxKo) + '</span>' : '') + '<span>' + esc(m.range) + '</span><em class="' + m.pillar.stemElement + '">' + esc(m.pillar.ko) + ' ' + m.pillar.hanja + '</em></div>' +
+        '<p class="ny-flow">' + esc(m.flow) + (m.help ? ' <i>★ 힘이 나는 달</i>' : '') + '</p><p>' + esc(m.text) + '</p>' +
+        (m.good ? '<p class="ny-gc good"><b>좋은 점 · ' + esc(m.good.ko) + '</b> ' + esc(m.good.text) + '</p>' : '') +
+        (m.care ? '<p class="ny-gc care"><b>조심할 점 · ' + esc(m.care.ko) + '</b> ' + esc(m.care.text) + '</p>' : '') +
+        '<p class="ny-tip">✓ ' + esc(m.tip) + '</p></div>';
     }).join('') + '</div>';
+    if (b.verdict) { var vd = b.verdict; return '<div class="ny-verdict ' + vd.wx + '"><span class="ic" aria-hidden="true">' + vd.icon + '</span><div><small>2027년 한 줄 판정 · ' + esc(vd.ko) + '</small><b>' + esc(vd.head) + '</b><p>' + esc(vd.why) + '</p>' +
+      '<p class="ny-vm"><span class="g">☀ 좋은 달 <b>' + esc(vd.good) + '</b></span><span class="c">☁ 조심할 달 <b>' + esc(vd.care) + '</b></span></p></div></div>'; }
+    if (b.quarter) { var q = b.quarter; return '<div class="ny-q ' + q.wx + '"><div class="ny-q-h"><b>' + esc(q.label) + '</b><span class="ny-wx ' + q.wx + '">' + q.icon + ' ' + esc(q.wxKo) + '</span><span class="ny-q-ms">' + q.months.map(function (m) { return '<i class="' + m.wx + '">' + esc(m.short.replace('월', '')) + m.icon + '</i>'; }).join('') + '</span></div>' +
+      '<p class="ny-q-head">' + esc(q.head) + '</p>' + q.rows.map(function (x) {
+        return '<div class="ny-q-row ' + x.wx + '"><span class="k">' + x.icon + ' ' + esc(x.ko) + '<em>' + x.wxIcon + ' ' + esc(x.wxKo) + '</em></span><p>' + esc(x.text) + '</p></div>';
+      }).join('') + (q.help ? '<p class="ny-q-help">★ ' + esc(q.help) + '</p>' : '') + '</div>'; }
+    if (b.when) return '<div class="ny-when' + (b.wide ? ' wide' : '') + '">' + b.when.map(function (w) { return '<div><span>' + esc(w[0]) + '</span><b>' + esc(w[1]) + '</b></div>'; }).join('') + '</div>';
     if (b.wx) return '<div class="td-wx">' + b.wx.map(function (x) {
       return '<div class="td-wx-row ' + x.wx + '"><span class="ic" aria-hidden="true">' + x.icon + '</span><div><b>' + esc(x.ko) + ' <em>' + esc(x.wxKo) + '</em></b><p>' + esc(x.text) + '</p></div></div>';
     }).join('') + '</div>';
@@ -498,12 +508,12 @@
     var area = d + ' L' + pts[11][0].toFixed(1) + ' 140 L' + pts[0][0] + ' 140 Z';
     var dots = pts.map(function (p, i) {
       var m = ms[i];
-      return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" class="' + (m.help ? 'h' : '') + '"/>' + (m.help ? '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] - 10).toFixed(1) + '" class="st">★</text>' : '') +
+      return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (m.o === 2 ? 5.5 : 4) + '" class="' + (m.wx || '') + (m.help ? ' h' : '') + '"/>' + (m.help ? '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] - 10).toFixed(1) + '" class="st">★</text>' : '') +
         '<text x="' + p[0].toFixed(1) + '" y="160" class="mo">' + m.short.replace('월', '') + '</text>';
     }).join('');
     return '<div class="ny-wave"><svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="12달 흐름 물결 그림"><defs><linearGradient id="nyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a" stop-opacity=".35"/><stop offset="1" stop-color="#ffe08a" stop-opacity="0"/></linearGradient></defs>' +
       '<path d="' + area + '" fill="url(#nyG)"/><path d="' + d + '" class="ln"/>' + dots + '</svg>' +
-      '<p class="ny-wave-k"><span>위로 갈수록 바깥으로 활발히</span><span>아래는 안으로 다지기</span><span>★ 나를 돕는 기운</span></p></div>';
+      '<p class="ny-wave-k"><span>위로 갈수록 운이 좋은 달</span><span><i class="dk sun"></i>좋음 <i class="dk part"></i>보통 <i class="dk cloud"></i>조심</span><span>★ 나를 돕는 기운</span></p></div>';
   }
   var lastNy = null;
   function showNewYear() {
@@ -1007,11 +1017,13 @@
       g.strokeStyle = '#ffe08a'; g.lineWidth = 6; g.shadowColor = '#ffe08a'; g.shadowBlur = 18; g.stroke(); g.shadowBlur = 0;
       pts.forEach(function (p, i) {
         var m = rep.months[i];
-        g.fillStyle = m.help ? '#5fe0a0' : '#ffe08a'; g.beginPath(); g.arc(p[0], p[1], m.help ? 12 : 9, 0, 6.283); g.fill();
+        g.fillStyle = m.o === 0 ? '#8fa3d6' : m.o === 2 ? '#ffe08a' : '#e9e2ff'; g.beginPath(); g.arc(p[0], p[1], m.o === 2 ? 13 : 9, 0, 6.283); g.fill();
+        g.fillStyle = '#5fe0a0';
         if (m.help) { g.font = '34px "Gowun Dodum"'; g.fillText('★', p[0], p[1] - 24); }
         g.fillStyle = '#c9bfe6'; g.font = '30px "Gowun Dodum"'; g.fillText(m.short.replace('월', ''), p[0], yb + 60);
       });
-      g.fillStyle = '#9a8fc0'; g.font = '30px "Gowun Dodum"'; g.fillText('달마다의 흐름 (월) · ★ 힘이 나는 달', W / 2, yb + 116);
+      g.fillStyle = '#ffe08a'; g.font = '700 40px "Gowun Batang"'; g.fillText(['☁', '⛅', '☀'][rep.yearLv] + ' ' + rep.yearHead, W / 2, yb + 122);
+      g.fillStyle = '#c9bfe6'; g.font = '30px "Gowun Dodum"'; g.fillText('좋은 달 ' + (rep.goodMonths.length ? NewYear.monthSpan(rep.goodMonths) : '고르게') + '  ·  ★ 힘이 나는 달', W / 2, yb + 176);
       g.fillStyle = '#c9bfe6'; g.font = '32px "Gowun Dodum"';
       var addr = (location.host + location.pathname).replace(/^www\./, '').replace(/index\.html$/, '').replace(/\/$/, '');
       g.fillText('나의 2027 신년운세 보기 → ' + addr, W / 2, 1290);

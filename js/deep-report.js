@@ -206,6 +206,13 @@
     chapters.push({ id: 'daeun', title: '인생의 큰 흐름 (대운)', sub: '10년마다 바뀌는 바람', blocks: clean(db) });
 
     // ---------- 10. 올해·내년 ----------
+    // 0.16 한 해 안에서 좋은 달·조심할 달 (신년운세와 같은 계산)
+    function nyTiming(Y) {
+      try {
+        var NYm = (typeof module === 'object' && module.exports) ? require('./newyear.js') : (typeof self !== 'undefined' ? self.NewYear : null);
+        return NYm && NYm.timing ? NYm.timing(r, a, Y) : null;
+      } catch (e) { return null; }
+    }
     var yb = [];
     a.years.forEach(function (y) {
       var t = g(D.yearLuck, y.god) || {};
@@ -213,6 +220,8 @@
       yb.push(P(y.pillar.ko + '년의 위 글자는 ' + nameJ + '에게 ' + godJ(y.god, '이에요', '예요') + '.'));
       yb.push(P(t.text));
       y.extra.forEach(function (k) { yb.push(P(g(D.yearExtra, k))); });
+      var tm = nyTiming(y.year);
+      if (tm) yb.push({ when: [['☀ 좋은 때', tm.goodText || '고르게'], ['☁ 조심할 때', tm.careText || '없어요 · 고르게 괜찮아요']] });
       if (t.tips) yb.push({ list: t.tips, label: y.year + '년에 해 보면 좋은 것' });
     });
     chapters.push({ id: 'years', title: '올해와 내년', sub: a.years.map(function (y) { return y.year + ' ' + y.pillar.ko; }).join(' · '), blocks: clean(yb) });
