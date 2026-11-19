@@ -618,6 +618,27 @@
   });
   initTdBack();
 
+  // ── 방문 통계: 누른 버튼 이름과 횟수만 센다 (입력한 이름·생일은 보내지 않음) ──
+  var TRACK_IDS = {
+    btnTdBack: ['today_open', { from: 'home' }], btnTd: ['today_open', { from: 'result' }], btnCal: ['calendar_open'],
+    btnDeep: ['deep_open'], dwGo: ['deep_read'], btnNy: ['newyear_open', { from: 'result' }], btnNyForm: ['newyear_open', { from: 'home' }],
+    btnMt: ['match_open', { from: 'result' }], btnMtForm: ['match_open', { from: 'home' }],
+    btnCard: ['card_make', { kind: 'saju' }], rpTdCard: ['card_make', { kind: 'today' }], rpNyCard: ['card_make', { kind: 'newyear' }],
+    rpMtCard: ['card_make', { kind: 'match' }], rpWkCard: ['card_make', { kind: 'work' }],
+    btnFriend: ['share'], btnAgain: ['friend_saju'], rpPrint: ['pdf_save'], rpPrintBig: ['pdf_save', { big: 'yes' }],
+    rLiLink: ['lucky_item_click', { at: 'result' }], rpLink: ['lucky_item_click', { at: 'report' }],
+    a2hsGo: ['a2hs_click'], a2hsX: ['a2hs_later'], rDonToss: ['donate_click'], rDonKakao: ['donate_click'], rpDonToss: ['donate_click'], rpDonKakao: ['donate_click']
+  };
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[id]') : null;
+    var t = el && TRACK_IDS[el.id]; if (t && window.track) window.track(t[0], t[1]);
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (a && /ilju\//.test(a.getAttribute('href')) && window.track) window.track('ilju_open');
+  }, true);
+  $('form').addEventListener('submit', function () { if (window.track) window.track('saju_view'); });
+  $('mtForm').addEventListener('submit', function () { if (window.track) window.track('match_view', { kind: mkind() }); });
+  window.addEventListener('appinstalled', function () { if (window.track) window.track('a2hs_installed'); });
+  if (window.matchMedia && matchMedia('(display-mode: standalone)').matches && window.track) window.track('open_from_home');
   // ── 30일 운세 달력 (날씨 그림 + 하루 이름 한 줄, 자세한 풀이는 그날) ──
   function calMount(r, a, ymd) {
     var btn = $('btnCal'), box = $('tdCal'); if (!btn || !box) return;
