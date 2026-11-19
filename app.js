@@ -425,6 +425,16 @@
       return '<div class="ny-mo' + (m.help ? ' help' : '') + '"><div class="ny-mo-h"><b>' + esc(m.label) + '</b><span>' + esc(m.range) + '</span><em class="' + m.pillar.stemElement + '">' + esc(m.pillar.ko) + ' ' + m.pillar.hanja + '</em></div>' +
         '<p class="ny-flow">' + esc(m.flow) + (m.help ? ' <i>★ 힘이 나는 달</i>' : '') + '</p><p>' + esc(m.text) + '</p><p class="ny-tip">✓ ' + esc(m.tip) + '</p></div>';
     }).join('') + '</div>';
+    if (b.wx) return '<div class="td-wx">' + b.wx.map(function (x) {
+      return '<div class="td-wx-row ' + x.wx + '"><span class="ic" aria-hidden="true">' + x.icon + '</span><div><b>' + esc(x.ko) + ' <em>' + esc(x.wxKo) + '</em></b><p>' + esc(x.text) + '</p></div></div>';
+    }).join('') + '</div>';
+    if (b.flow) return '<div class="td-flow">' + b.flow.map(function (x) { return '<div><span>' + esc(x.when) + '</span><p>' + esc(x.text) + '</p></div>'; }).join('') + '</div>';
+    if (b.hours) return '<p class="rp-label">좋은 시간</p><div class="td-hours">' + b.hours.map(function (x) { return '<span><b>' + esc(x.ko) + '</b> ' + esc(x.range) + '</span>'; }).join('') + '</div>' + (b.text ? '<p>' + esc(b.text) + '</p>' : '');
+    if (b.say) return '<p class="td-say">“' + esc(b.say) + '”</p>';
+    if (b.todo) return '<div class="td-todo"><div class="do"><span>✓ 오늘 해 볼 일</span><b>' + esc(b.todo[0]) + '</b></div><div class="rest"><span>☾ 오늘은 쉬어 갈 일</span><b>' + esc(b.todo[1]) + '</b></div></div>';
+    if (b.week) return '<div class="td-week">' + b.week.map(function (w, i) {
+      return '<div class="' + (i === 0 ? 'now ' : '') + w.wx + '"><span>' + esc(w.label) + '</span><i aria-label="' + ({ sun: '맑음', part: '구름 조금', cloud: '흐림' }[w.wx]) + '">' + w.icon + '</i><small>' + esc(w.md) + '</small></div>';
+    }).join('') + '</div><p class="td-week-k"><span>☀ 맑음</span> · <span>⛅ 구름 조금</span> · <span>☁ 흐림</span></p>';
     if (b.lucky) return '<div class="rp-lucky">' + b.lucky.map(function (l) { return '<div><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join('') + '</div>';
     return '';
   }
@@ -464,16 +474,17 @@
   function setRpHead(mode) {
     if (RP_HOW === null) RP_HOW = $('rpHow').textContent;
     var isM = mode === 'mt' || mode === 'sk' || mode === 'wk';
-    $('rpPill').textContent = mode === 'ny' ? '🎍 별빛 2027 신년운세' : mode === 'mt' ? '💞 별빛 연애 궁합' : mode === 'sk' ? '💗 별빛 속궁합' : mode === 'wk' ? '💼 별빛 일 궁합' : '✦ 별빛 깊은 감정서';
+    $('rpPill').textContent = mode === 'td' ? '☾ 별빛 오늘의 운세' : mode === 'ny' ? '🎍 별빛 2027 신년운세' : mode === 'mt' ? '💞 별빛 연애 궁합' : mode === 'sk' ? '💗 별빛 속궁합' : mode === 'wk' ? '💼 별빛 일 궁합' : '✦ 별빛 깊은 감정서';
     $('rpPillars').className = 'rp-mini';
-    $('rpMtCard').hidden = mode !== 'mt'; $('rpWkCard').hidden = mode !== 'wk';
+    $('rpMtCard').hidden = mode !== 'mt'; $('rpWkCard').hidden = mode !== 'wk'; $('rpTdCard').hidden = mode !== 'td'; $('rpToc').hidden = mode === 'td';
     $('rpMtAgain').hidden = $('rpOther').hidden = !isM;
     if (isM) {
       var others = ['mt', 'sk', 'wk'].filter(function (k) { return k !== mode; });
       $('rpOtherA').textContent = MK_LABEL[others[0]]; $('rpOtherA').dataset.k = others[0];
       $('rpOtherB').textContent = MK_LABEL[others[1]]; $('rpOtherB').dataset.k = others[1];
     }
-    $('rpHow').textContent = mode === 'sk' ? '이 속궁합은 두 사람의 배우자 자리(일지)와 천간합, 도화, 사주의 온도와 양·음, 식상·인성 기운을 명리학의 규칙으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 재미로 비유한 풀이이며 성별은 계산에 쓰지 않아요.'
+    $('rpHow').textContent = mode === 'td' ? '이 오늘의 운세는 오늘 날짜의 글자(일진)와 이번 달 글자를 내 사주 여덟 글자와 명리학의 규칙(십신·지지의 합충형·원진·나를 돕는 기운)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 같은 날에는 몇 번을 열어도 같은 풀이가 나와요.'
+      : mode === 'sk' ? '이 속궁합은 두 사람의 배우자 자리(일지)와 천간합, 도화, 사주의 온도와 양·음, 식상·인성 기운을 명리학의 규칙으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 재미로 비유한 풀이이며 성별은 계산에 쓰지 않아요.'
       : mode === 'wk' ? '이 일 궁합은 두 사람의 일간 오행 관계(십신)와 일하는 자리(월지)의 합충, 다섯 기운의 수, 사주의 온도를 명리학의 규칙으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 동업·투자 같은 결정은 전문가와 상의해 주세요.'
       : mode === 'mt' ? '이 궁합은 두 사람의 사주 글자를 명리학의 규칙(천간합·오행의 상생상극·지지의 합충형·원진·십신)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요. 성별은 계산에 쓰지 않아요.' : mode === 'ny' ? '이 신년운세는 내 사주 여덟 글자와 2027년 정미년, 그리고 절기로 바뀌는 열두 달의 글자를 명리학의 규칙(십신·합충·신살·대운)으로 맞춰 보고, 별빛 사주가 직접 쓴 풀이 글을 골라 이어 붙여 만들었어요.' : RP_HOW;
     $('rpNyCard').hidden = mode !== 'ny';
@@ -529,6 +540,80 @@
     $('gatherText').textContent = '2027년의 별을 모으고 있어요…';
     gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showNewYear(); });
   });
+
+  // ---------- 오늘의 운세 (0.11) ----------
+  var lastTd = null;
+  function showToday() {
+    if (!last) return;
+    var input = last.input, r = last.result;
+    var a = window.SajuAnalysis.analyze(r, { gender: input.gender });
+    var rep = window.Today.build(r, a, input, seoulToday());
+    lastTd = rep; rpMode = 'td'; setRpHead('td');
+    $('rpTitle').textContent = (input.name ? input.name + '님' : '나') + '의 오늘 운세';
+    $('rpSub').textContent = rep.date.m + '월 ' + rep.date.d + '일 ' + rep.dow + '요일 · 오늘은 ' + rep.pillar.ko + '(' + rep.pillar.hanja + ')일';
+    $('rpPillars').innerHTML = ['hour', 'day', 'month', 'year'].map(function (k) {
+      var p = r.pillars[k], lab = { hour: '시', day: '일·나', month: '월', year: '년' }[k];
+      return '<div class="' + (k === 'day' ? 'me' : '') + '"><span class="' + (p ? p.stemElement : '') + '">' + (p ? p.stemHanja : '?') + '</span><br><span class="' + (p ? p.branchElement : '') + '">' + (p ? p.branchHanja : '?') + '</span><small>' + lab + '</small></div>';
+    }).join('') + '<div class="ny-yp"><span class="' + rep.pillar.stemElement + '">' + rep.pillar.hanja[0] + '</span><br><span class="' + rep.pillar.branchElement + '">' + rep.pillar.hanja[1] + '</span><small>오늘</small></div>';
+    $('rpSummary').innerHTML = ['오늘의 이름: “' + rep.title + '”'].concat(rep.summary).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
+    var chs = [
+      { id: 'td-wx', title: '오늘의 날씨', sub: '일 · 돈 · 사랑 · 사람 · 몸', blocks: [{ chips: rep.kw.map(function (k) { return '#' + k; }), label: '오늘의 낱말' }, { wx: rep.areas }] },
+      { id: 'td-flow', title: '오늘의 흐름', sub: '아침 · 낮 · 저녁, 그리고 좋은 시간', blocks: [{ flow: rep.flow }].concat(rep.hours.length ? [{ hours: rep.hours, text: rep.hourText }] : []) },
+      { id: 'td-about', title: '오늘 글자 풀이', sub: '오늘 날 글자와 내 글자의 만남', blocks: [{ p: rep.about }, { p: rep.month }, { say: rep.saying }] },
+      { id: 'td-lucky', title: '오늘의 행운', sub: '나를 돕는 작은 것들', blocks: [{ lucky: rep.lucky }, { todo: [rep.todo, rep.rest] }] },
+      { id: 'td-week', title: '이번 주 날씨', sub: '오늘부터 7일', blocks: [{ week: rep.week }, { p: rep.tomorrow, cls: 'td-tmw' }, { p: '내일 또 봐요 ☾', cls: 'td-bye' }] }
+    ];
+    $('rpToc').innerHTML = '';
+    $('rpBody').innerHTML = chs.map(function (c, i) {
+      return '<article class="glass card rp-ch" id="ch-' + c.id + '"><p class="no">' + (i + 1) + ' / ' + chs.length + '</p><h3>' + esc(c.title) + '</h3><p class="chsub">' + esc(c.sub) + '</p>' + c.blocks.map(renderBlock).join('') + '</article>';
+    }).join('');
+    // 행운템은 풀이 맨 아래 (광고 안내 문구는 행운템 칸 맨 위)
+    $('rpBody').parentNode.insertBefore($('rpLucky'), $('rpDonate'));
+    if (luckyToday) { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
+    var DN = window.SAJU_LUCKY && window.SAJU_LUCKY.DONATE, donOn = !!(DN && DN.enabled && (DN.toss || DN.kakao));
+    $('rpDonate').hidden = !donOn;
+    var sz = '1'; try { sz = localStorage.getItem(SIZE_KEY) || '1'; } catch (e) { }
+    setSize(sz);
+    $('viewInput').hidden = true; $('viewResult').hidden = true; $('viewMatch').hidden = true; $('viewReport').hidden = false; scrollTo(0, 0);
+    document.body.classList.add('reading');
+    var cs = document.querySelectorAll('#viewReport .rp-ch');
+    cs.forEach(function (c, i) { c.classList.add('reveal'); setTimeout(function () { c.classList.add('in'); }, 200 + i * 120); });
+    window.__lastTdChars = rep.chars;
+  }
+  $('btnTd').addEventListener('click', function () {
+    if (!last) return;
+    $('gatherText').textContent = '오늘의 별을 모으고 있어요…';
+    gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showToday(); });
+  });
+  // 다시 온 사람: 첫 화면 맨 위에 오늘 운세 칸 (생일은 이 휴대폰 안에만 저장)
+  function savedInput() { try { var s = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); return s && s.year ? s : null; } catch (e) { return null; } }
+  function initTdBack() {
+    var s = savedInput();
+    if (!s) { $('tdBack').hidden = true; return; }
+    var td = seoulToday();
+    $('tdBackDate').textContent = td.m + '월 ' + td.d + '일 · 오늘은 ' + E.dayPillarOf(td.y, td.m, td.d).ko + '일';
+    $('tdBackTitle').textContent = (s.name ? s.name + '님, ' : '') + '오늘 운세가 도착했어요 ☾';
+    $('tdBackSub').textContent = '지난번에 넣은 생일(' + s.year + '.' + s.month + '.' + s.day + (s.calendar === 'lunar' ? ' 음력' : '') + ')로 바로 보여 드려요. 생일은 이 휴대폰 안에만 있어요.';
+    $('btnForget').textContent = '내 정보 지우기'; $('btnForget').dataset.n = '0';
+    $('tdBack').hidden = false;
+  }
+  $('btnTdBack').addEventListener('click', function () {
+    var s = savedInput(), result;
+    if (!s) { $('tdBack').hidden = true; return; }
+    try { result = E.calculate(s); } catch (e) { $('tdBack').hidden = true; return; }
+    last = { input: s, result: result }; resultShown = true;
+    $('gatherText').textContent = '오늘의 별을 모으고 있어요…';
+    gather(function () { $('gatherText').textContent = '별을 모으고 있어요…'; showResult(s, result, true); showToday(); });
+  });
+  // 실수로 지우지 않게 두 번 눌러야 지운다
+  $('btnForget').addEventListener('click', function () {
+    var b = this;
+    if (b.dataset.n !== '1') { b.dataset.n = '1'; b.textContent = '한 번 더 누르면 이 휴대폰에서 지워져요'; return; }
+    try { localStorage.removeItem(STORE_KEY); localStorage.removeItem(P_KEY); localStorage.removeItem(POP_KEY); } catch (e) { }
+    $('form').reset(); $('fNoTime').checked = false; $('fHour').disabled = $('fMin').disabled = false; $('leapWrap').hidden = true;
+    $('tdBack').hidden = true;
+  });
+  initTdBack();
 
   // ---------- 궁합 (연애 · 속궁합 · 일 궁합) ----------
   var MK_LABEL = { mt: '💞 연애 궁합 보기', sk: '💗 속궁합 보기', wk: '💼 일 궁합 보기' };
@@ -698,7 +783,7 @@
     }
     sfx('open'); deepWait();
   });
-  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewMatch').hidden = true; $('viewInput').hidden = true; $('viewReport').hidden = true; $('viewResult').hidden = false; $(rpMode === 'ny' ? 'rNyCta' : (rpMode === 'mt' || rpMode === 'sk' || rpMode === 'wk') ? 'rMtCta' : 'rDeepCta').scrollIntoView(); });
+  $('rpBack').addEventListener('click', function () { document.body.classList.remove('reading'); $('viewMatch').hidden = true; $('viewInput').hidden = true; $('viewReport').hidden = true; $('viewResult').hidden = false; $(rpMode === 'td' ? 'rTodayDate' : rpMode === 'ny' ? 'rNyCta' : (rpMode === 'mt' || rpMode === 'sk' || rpMode === 'wk') ? 'rMtCta' : 'rDeepCta').scrollIntoView(); });
   $('rpTop').addEventListener('click', function () { scrollTo(0, 0); });
   $('rpPrint').addEventListener('click', function () { var v = $('viewReport').style.getPropertyValue('--rs'); window.print(); });
   $('rpPrintBig').addEventListener('click', function () {
@@ -878,6 +963,54 @@
       .then(function () { btn.disabled = false; btn.textContent = '💼 우리 팀 카드 만들기'; });
   });
   var cardName = 'byeolbit-saju.png';
+  function makeTdCard(input, rep) {
+    var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var g = cv.getContext('2d');
+    return Promise.all([loadImg('img/sky.jpg'), document.fonts.load('700 60px "Gowun Batang"'), document.fonts.load('40px "Gowun Dodum"')]).then(function (res) {
+      g.fillStyle = '#120a2e'; g.fillRect(0, 0, W, H);
+      g.globalAlpha = .75; cover(g, res[0], 0, 0, W, H); g.globalAlpha = 1;
+      var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(18,10,46,.35)'); gr.addColorStop(1, 'rgba(18,10,46,.92)');
+      g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      for (var i = 0; i < 140; i++) { g.globalAlpha = Math.random() * .8 + .2; g.fillStyle = Math.random() < .2 ? '#bfe0ff' : '#fff'; g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() * 2.2 + .4, 0, 6.283); g.fill(); }
+      g.globalAlpha = 1; g.textAlign = 'center';
+      g.fillStyle = '#ffe08a'; g.font = '700 38px "Gowun Batang"'; g.fillText('☾ 별빛 사주 · 오늘의 운세', W / 2, 96);
+      g.fillStyle = '#f3ecff'; g.font = '700 58px "Gowun Batang"'; g.fillText((input.name ? input.name + '님의' : '나의') + ' 오늘', W / 2, 182);
+      g.fillStyle = '#c9bfe6'; g.font = '34px "Gowun Dodum"'; g.fillText(rep.date.m + '월 ' + rep.date.d + '일 ' + rep.dow + '요일 · ' + rep.pillar.ko + '(' + rep.pillar.hanja + ')일', W / 2, 240);
+      g.fillStyle = '#ffe08a'; g.font = '700 62px "Gowun Batang"'; g.shadowColor = '#ffe08a'; g.shadowBlur = 20;
+      g.fillText('“' + rep.title + '”', W / 2, 350); g.shadowBlur = 0;
+      var y0 = 420, rh = 112;
+      rep.areas.forEach(function (x, i) {
+        var y = y0 + i * (rh + 14);
+        roundRect(g, 130, y, W - 260, rh, 28); g.fillStyle = x.wx === 'sun' ? 'rgba(255,224,138,.14)' : 'rgba(255,255,255,.08)'; g.fill();
+        g.lineWidth = 2; g.strokeStyle = x.wx === 'sun' ? 'rgba(255,224,138,.55)' : 'rgba(255,255,255,.2)'; g.stroke();
+        g.textAlign = 'left'; g.fillStyle = '#f3ecff'; g.font = '700 46px "Gowun Batang"'; g.fillText(x.ko, 180, y + 72);
+        g.textAlign = 'center'; g.font = '64px sans-serif'; g.fillStyle = '#fff'; g.fillText(x.icon, W / 2 + 40, y + 80);
+        g.textAlign = 'right'; g.fillStyle = x.wx === 'sun' ? '#ffe08a' : '#c9bfe6'; g.font = '38px "Gowun Dodum"'; g.fillText(x.wxKo, W - 180, y + 70);
+      });
+      var ly = y0 + 5 * (rh + 14) + 70;
+      g.textAlign = 'center'; g.font = '38px "Gowun Dodum"';
+      var lt = '행운의 색 ' + rep.lucky[0][1] + '   ·   행운의 숫자 ' + rep.lucky[1][1];
+      var tw = g.measureText(lt).width;
+      g.fillStyle = rep.luckyHex || '#ffe08a'; g.beginPath(); g.arc(W / 2 - tw / 2 - 36, ly - 13, 18, 0, 6.283); g.fill();
+      g.fillStyle = '#f3ecff'; g.fillText(lt, W / 2 + 10, ly);
+      g.fillStyle = '#ffe08a'; g.font = '40px "Gowun Batang"'; wrapText(g, '“' + rep.saying + '”', W / 2, ly + 86, W - 200, 52, 2);
+      g.fillStyle = '#c9bfe6'; g.font = '32px "Gowun Dodum"';
+      var addr = (location.host + location.pathname).replace(/^www\./, '').replace(/index\.html$/, '').replace(/\/$/, '');
+      g.fillText('나의 오늘 운세 보기 → ' + addr, W / 2, 1290);
+      return new Promise(function (ok) { cv.toBlob(function (b) { ok({ blob: b, url: URL.createObjectURL(b) }); }, 'image/png'); });
+    });
+  }
+  $('rpTdCard').addEventListener('click', function () {
+    if (!last || !lastTd) return;
+    var btn = this; btn.disabled = true; btn.textContent = '카드를 그리는 중…';
+    makeTdCard(last.input, lastTd).then(function (c) {
+      cardBlob = c.blob; cardName = 'byeolbit-today.png'; $('cardImg').src = c.url; $('cardTip').textContent = '';
+      var file = new File([c.blob], cardName, { type: 'image/png' });
+      $('cardShare').hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
+      $('cardModal').hidden = false; sfx('open');
+    }).catch(function () { $('cardTip').textContent = '카드를 그리지 못했어요. 다시 눌러 주세요'; })
+      .then(function () { btn.disabled = false; btn.textContent = '☾ 오늘의 운세 카드 만들기'; });
+  });
   $('rpNyCard').addEventListener('click', function () {
     if (!last || !lastNy) return;
     var btn = this; btn.disabled = true; btn.textContent = '카드를 그리는 중…';
@@ -907,8 +1040,8 @@
   });
   $('cardShare').addEventListener('click', function () {
     var file = new File([cardBlob], cardName, { type: 'image/png' });
-    var ny = cardName.indexOf('2027') >= 0, mt = cardName.indexOf('match') >= 0, tm = cardName.indexOf('team') >= 0;
-    navigator.share({ files: [file], title: '별빛 사주', text: (tm ? '우리 일 궁합 나왔어 💼 ' : mt ? '우리 궁합 나왔어 💞 ' : ny ? '내 2027 신년운세야 ✦ ' : '내 별자리 사주 카드야 ✦ ') + location.origin + location.pathname }).catch(function () { });
+    var ny = cardName.indexOf('2027') >= 0, mt = cardName.indexOf('match') >= 0, tm = cardName.indexOf('team') >= 0, td = cardName.indexOf('today') >= 0;
+    navigator.share({ files: [file], title: '별빛 사주', text: (td ? '내 오늘의 운세야 ☾ ' : tm ? '우리 일 궁합 나왔어 💼 ' : mt ? '우리 궁합 나왔어 💞 ' : ny ? '내 2027 신년운세야 ✦ ' : '내 별자리 사주 카드야 ✦ ') + location.origin + location.pathname }).catch(function () { });
   });
   $('lpClose').addEventListener('click', closeLucky);
   $('lpSkip').addEventListener('click', closeLucky);

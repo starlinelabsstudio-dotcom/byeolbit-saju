@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Song+Myung&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=0.10.0">
+<link rel="stylesheet" href="style.css?v=0.11.0">
 </head>
 <body>
 <div class="sky" aria-hidden="true">
@@ -38,6 +38,14 @@
       <h1>별이 읽어주는<br><em>나의 사주</em></h1>
       <p class="lead">태어난 날의 하늘을 펼쳐<br>나만의 여덟 글자를 찾아드려요</p>
     </div>
+
+    <article class="glass card td-back" id="tdBack" hidden>
+      <p class="card-k" id="tdBackDate"></p>
+      <h3 id="tdBackTitle">오늘 운세가 도착했어요 ☾</h3>
+      <p class="td-back-sub" id="tdBackSub"></p>
+      <button class="btn-main" id="btnTdBack" type="button">☾ 오늘 운세 바로 보기</button>
+      <button class="td-forget" id="btnForget" type="button">내 정보 지우기</button>
+    </article>
 
     <form id="form" class="glass form" novalidate>
       <label class="field">
@@ -192,6 +200,7 @@
         <div><span>행운의 색</span><b id="rLuckyColor"></b></div>
         <div><span>행운의 숫자</span><b id="rLuckyNum"></b></div>
       </div>
+      <button class="btn-main td-more" id="btnTd" type="button">☾ 오늘 운세 자세히 보기</button>
     </article>
 
     <article class="glass card deep-cta" id="rDeepCta">
@@ -296,6 +305,7 @@
       <button class="btn-main" id="rpNyCard" type="button" hidden>✧ 나의 2027 카드 만들기</button>
       <button class="btn-main" id="rpMtCard" type="button" hidden>💞 우리 궁합 카드 만들기</button>
       <button class="btn-main" id="rpWkCard" type="button" hidden>💼 우리 팀 카드 만들기</button>
+      <button class="btn-main" id="rpTdCard" type="button" hidden>☾ 오늘의 운세 카드 만들기</button>
       <div class="mk-other" id="rpOther" hidden>
         <p>같은 사람과 다른 궁합 보기</p>
         <button class="btn-sub" id="rpOtherA" type="button"></button>
@@ -369,23 +379,25 @@
   <p id="gatherText">별을 모으고 있어요…</p>
 </div>
 
-<script src="js/korean-lunar-calendar.min.js?v=0.10.0"></script>
-<script src="js/jie-table.js?v=0.10.0"></script>
-<script src="js/saju-engine.js?v=0.10.0"></script>
-<script src="js/places.js?v=0.10.0"></script>
-<script src="js/texts.js?v=0.10.0"></script>
-<script src="js/lucky-items.js?v=0.10.0"></script>
-<script src="js/saju-analysis.js?v=0.10.0"></script>
-<script src="js/deep-a.js?v=0.10.0"></script>
-<script src="js/deep-b.js?v=0.10.0"></script>
-<script src="js/deep-c.js?v=0.10.0"></script>
-<script src="js/deep-report.js?v=0.10.0"></script>
-<script src="js/newyear-texts.js?v=0.10.0"></script>
-<script src="js/newyear.js?v=0.10.0"></script>
-<script src="js/match-texts.js?v=0.10.0"></script>
-<script src="js/match.js?v=0.10.0"></script>
-<script src="js/match-more-texts.js?v=0.10.0"></script>
-<script src="js/match-more.js?v=0.10.0"></script>
-<script src="app.js?v=0.10.0"></script>
+<script src="js/korean-lunar-calendar.min.js?v=0.11.0"></script>
+<script src="js/jie-table.js?v=0.11.0"></script>
+<script src="js/saju-engine.js?v=0.11.0"></script>
+<script src="js/places.js?v=0.11.0"></script>
+<script src="js/texts.js?v=0.11.0"></script>
+<script src="js/lucky-items.js?v=0.11.0"></script>
+<script src="js/saju-analysis.js?v=0.11.0"></script>
+<script src="js/deep-a.js?v=0.11.0"></script>
+<script src="js/deep-b.js?v=0.11.0"></script>
+<script src="js/deep-c.js?v=0.11.0"></script>
+<script src="js/deep-report.js?v=0.11.0"></script>
+<script src="js/newyear-texts.js?v=0.11.0"></script>
+<script src="js/newyear.js?v=0.11.0"></script>
+<script src="js/match-texts.js?v=0.11.0"></script>
+<script src="js/match.js?v=0.11.0"></script>
+<script src="js/match-more-texts.js?v=0.11.0"></script>
+<script src="js/match-more.js?v=0.11.0"></script>
+<script src="js/today-texts.js?v=0.11.0"></script>
+<script src="js/today.js?v=0.11.0"></script>
+<script src="app.js?v=0.11.0"></script>
 </body>
 </html>
