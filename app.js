@@ -435,6 +435,7 @@
     if (b.week) return '<div class="td-week">' + b.week.map(function (w, i) {
       return '<div class="' + (i === 0 ? 'now ' : '') + w.wx + '"><span>' + esc(w.label) + '</span><i aria-label="' + ({ sun: '맑음', part: '구름 조금', cloud: '흐림' }[w.wx]) + '">' + w.icon + '</i><small>' + esc(w.md) + '</small></div>';
     }).join('') + '</div><p class="td-week-k"><span>☀ 맑음</span> · <span>⛅ 구름 조금</span> · <span>☁ 흐림</span></p>';
+    if (b.cal) return '<button class="btn-sub td-cal-btn" id="btnCal" type="button" aria-expanded="false">☾ 30일 달력 보기</button><div class="td-cal-wrap" id="tdCal" hidden></div>';
     if (b.lucky) return '<div class="rp-lucky">' + b.lucky.map(function (l) { return '<div><span>' + esc(l[0]) + '</span><b>' + (l[2] ? '<i class="sw" style="background:' + l[2] + '"></i>' : '') + esc(l[1]) + '</b></div>'; }).join('') + '</div>';
     return '';
   }
@@ -561,13 +562,14 @@
       { id: 'td-flow', title: '오늘의 흐름', sub: '아침 · 낮 · 저녁, 그리고 좋은 시간', blocks: [{ flow: rep.flow }].concat(rep.hours.length ? [{ hours: rep.hours, text: rep.hourText }] : []) },
       { id: 'td-about', title: '오늘 글자 풀이', sub: '오늘 날 글자와 내 글자의 만남', blocks: [{ p: rep.about }, { p: rep.unLine }, { p: rep.month }, { say: rep.saying }] },
       { id: 'td-lucky', title: '오늘의 행운', sub: '나를 돕는 작은 것들', blocks: [{ lucky: rep.lucky.map(function (l, i) { return i === 0 && rep.luckyHex ? [l[0], l[1], rep.luckyHex] : l; }) }, { todo: [rep.todo, rep.rest] }] },
-      { id: 'td-week', title: '이번 주 날씨', sub: '오늘부터 7일', blocks: [{ week: rep.week }, { p: rep.tomorrow, cls: 'td-tmw' }, { p: '내일 또 봐요 ☾', cls: 'td-bye' }] }
+      { id: 'td-week', title: '이번 주 날씨', sub: '오늘부터 7일', blocks: [{ week: rep.week }, { cal: true }, { p: rep.tomorrow, cls: 'td-tmw' }, { p: '내일 또 봐요 ☾', cls: 'td-bye' }] }
     ];
     $('rpToc').innerHTML = '';
     $('rpBody').innerHTML = chs.map(function (c, i) {
       return '<article class="glass card rp-ch" id="ch-' + c.id + '"><p class="no">' + (i + 1) + ' / ' + chs.length + '</p><h3>' + esc(c.title) + '</h3><p class="chsub">' + esc(c.sub) + '</p>' + c.blocks.map(renderBlock).join('') + '</article>';
     }).join('');
     a2hsMount();
+    calMount(r, a, rep.date);
     // 행운템은 풀이 맨 아래 (광고 안내 문구는 행운템 칸 맨 위)
     $('rpBody').parentNode.insertBefore($('rpLucky'), $('rpDonate'));
     if (luckyToday) { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
@@ -616,6 +618,40 @@
   });
   initTdBack();
 
+  // ── 30일 운세 달력 (날씨 그림 + 하루 이름 한 줄, 자세한 풀이는 그날) ──
+  function calMount(r, a, ymd) {
+    var btn = $('btnCal'), box = $('tdCal'); if (!btn || !box) return;
+    btn.addEventListener('click', function () {
+      if (!box.dataset.done) {
+        var cal = window.Today.calendar(r, a, ymd, 30), d0 = cal.days[0];
+        var lead = new Date(Date.UTC(d0.ymd.y, d0.ymd.m - 1, d0.ymd.d)).getUTCDay();
+        var bd = cal.days[cal.best];
+        var h = '<p class="td-cal-sum">앞으로 30일 중 맑은 날 <b>' + cal.nSun + '일</b><br>가장 기운 좋은 날은 <b>' + bd.ymd.m + '월 ' + bd.ymd.d + '일 ' + bd.dow + '요일</b>' + (cal.best === 0 ? ' (바로 오늘!)' : '') + '</p>';
+        h += '<div class="td-cal-dow">' + ['일', '월', '화', '수', '목', '금', '토'].map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div><div class="td-cal">';
+        for (var k = 0; k < lead; k++) h += '<span class="td-cal-e" aria-hidden="true"></span>';
+        cal.days.forEach(function (d, i) {
+          var lab = i === 0 ? '오늘' : d.ymd.d === 1 ? d.ymd.m + '.1' : String(d.ymd.d);
+          h += '<button type="button" class="td-cal-d ' + d.wx + (i === 0 ? ' now' : '') + (i === cal.best ? ' best' : '') + '" data-i="' + i + '" aria-label="' + d.ymd.m + '월 ' + d.ymd.d + '일 ' + d.wxKo + '"><small>' + lab + '</small><i>' + d.icon + '</i></button>';
+        });
+        h += '</div><p class="td-week-k"><span>☀ 맑음</span> · <span>⛅ 구름 조금</span> · <span>☁ 흐림</span> · <span>✦ 가장 좋은 날</span></p>';
+        h += '<p class="td-cal-pick" id="tdCalPick">날짜를 누르면 그날의 이름이 보여요</p>';
+        box.innerHTML = h; box.dataset.done = '1';
+        box.querySelectorAll('.td-cal-d').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var i = +el.dataset.i, d = cal.days[i];
+            box.querySelectorAll('.td-cal-d.on').forEach(function (x) { x.classList.remove('on'); });
+            el.classList.add('on');
+            $('tdCalPick').innerHTML = '<b>' + (i === 0 ? '오늘' : d.ymd.m + '월 ' + d.ymd.d + '일 ' + d.dow + '요일') + '</b> · <span class="nw">' + d.icon + ' ' + esc(d.wxKo) + '</span><br><em>“' + esc(d.title) + '”</em><br><small>' + (i === 0 ? '지금 보고 있는 날이에요' : '자세한 풀이는 그날 열려요 ☾') + '</small>';
+            try { sfx && sfx('pop'); } catch (e) { }
+          });
+        });
+      }
+      var open = box.hidden;
+      box.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.textContent = open ? '☾ 30일 달력 접기' : '☾ 30일 달력 보기';
+    });
+  }
   // ── 홈 화면에 추가 안내 (오늘 운세 맨 아래에만, 닫으면 14일 동안 안 띄움) ──
   var A2HS_KEY = 'byeolbit-saju-a2hs', a2hsPrompt = null;
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); a2hsPrompt = e; var b = $('a2hsGo'); if (b) b.hidden = false; });

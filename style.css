@@ -486,3 +486,28 @@ body.reading .sound-btn { display: none; }
 .td-a2hs-go { margin: 4px 0 8px; }
 .td-a2hs-x { display: inline-block; margin-top: 4px; padding: 10px 14px; background: none; border: 0; color: inherit; opacity: .6; font: inherit; font-size: .85em; text-decoration: underline; cursor: pointer; }
 @media print { .td-a2hs { display: none; } }
+
+/* 0.14.0 30일 운세 달력 */
+.td-cal-btn { margin-top: 12px; }
+.td-cal-wrap { margin-top: 12px; }
+.td-cal-sum { text-align: center; margin: 0 0 10px; line-height: 1.7; word-break: keep-all; }
+.td-cal-sum b { color: #ffe08a; }
+.td-cal-dow, .td-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.td-cal-dow span { text-align: center; font-size: 12px; color: var(--ink3); }
+.td-cal-dow span:first-child { color: #ff9db8; }
+.td-cal { margin-top: 4px; }
+.td-cal-d { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; padding: 6px 0; border-radius: 10px; border: 1px solid transparent; background: rgba(255, 255, 255, .06); color: inherit; font: inherit; cursor: pointer; }
+.td-cal-d small { font-size: 11px; white-space: nowrap; color: var(--ink2, #d9d0f5); }
+.td-cal-d i { font-style: normal; font-size: 20px; line-height: 1.2; }
+.td-cal-d.sun { background: rgba(255, 224, 138, .1); border-color: rgba(255, 224, 138, .35); box-shadow: 0 0 8px rgba(255, 224, 138, .15); }
+.td-cal-d.now { border-color: rgba(255, 224, 138, .9); }
+.td-cal-d.now small { color: #ffe08a; font-weight: 700; }
+.td-cal-d.best { position: relative; }
+.td-cal-d.best::after { content: '✦'; position: absolute; top: 1px; right: 3px; font-size: 9px; color: #ffe08a; }
+.td-cal-d.on { outline: 2px solid #f39ac2; outline-offset: 1px; }
+.td-cal-pick { margin: 10px 0 0; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, .06); text-align: center; line-height: 1.7; word-break: keep-all; }
+.td-cal-pick em { font-style: normal; color: #ffe08a; font-family: "Gowun Batang", serif; font-size: 1.08em; }
+.td-cal-pick small { color: var(--ink3); }
+.td-cal-pick .nw, .td-cal-sum b { white-space: nowrap; }
+@media (max-width: 300px) { .td-cal-d i { font-size: 16px; } .td-cal-d small { font-size: 10px; } .td-cal, .td-cal-dow { gap: 3px; } }
+@media print { .td-cal-btn { display: none; } }

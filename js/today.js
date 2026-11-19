@@ -1,5 +1,5 @@
 /*
- * 별빛 사주 — 오늘의 운세 (0.11 · 0.13 공부·배움 칸)
+ * 별빛 사주 — 오늘의 운세 (0.11 · 0.13 공부·배움 칸 · 0.14 30일 달력)
  * build(r, a, input, ymd) → { kind:'td', date, pillar, god, title, summary[], areas[], flow[], hours[], lucky[], todo, rest, week[], tomorrow, chars }
  * r: SajuEngine.calculate 결과, a: SajuAnalysis.analyze 결과, ymd: { y, m, d } (서울 날짜)
  * 같은 사람·같은 날이면 언제 열어도 같은 결과. 글: SAJU_TD(src/today-texts.js)
@@ -136,6 +136,23 @@
     });
   }
 
+  // 30일 달력: 날마다 하루 날씨와 하루 이름만 (자세한 풀이는 그날 열어야 보인다)
+  function calendar(r, a, ymd, n) {
+    n = n || 30;
+    var days = [], nSun = 0, best = -1, bestV = -1e9, bestSun = false;
+    for (var i = 0; i < n; i++) {
+      var dd = addDays(ymd, i), sc = score(r, a, dd);
+      var tot = AREAS.reduce(function (t, k) { return t + sc.s[k]; }, 0);
+      var w = WX[sc.overall];
+      if (sc.overall === 2) nSun++;
+      // 가장 기운 좋은 날: 맑은 날 가운데 갈래 합이 가장 큰 날 (같으면 빠른 날)
+      var isSun = sc.overall === 2;
+      if ((isSun && !bestSun) || (isSun === bestSun && tot > bestV)) { best = i; bestV = tot; bestSun = isSun; }
+      days.push({ ymd: dd, dow: DOW[new Date(Date.UTC(dd.y, dd.m - 1, dd.d)).getUTCDay()], wx: w, icon: WX_ICON[w], wxKo: WX_KO[w], title: T.god[sc.god].title, ko: sc.pillar.ko });
+    }
+    return { days: days, nSun: nSun, best: best };
+  }
+
   function build(r, a, input, ymd) {
     var name = input && input.name ? input.name : '';
     var sc = score(r, a, ymd), tp = sc.pillar;
@@ -200,5 +217,5 @@
     };
   }
 
-  return { build: build, score: score, luckyOf: luckyOf, hoursOf: hoursOf, windOf: windOf, AREAS: AREAS, WX_ICON: WX_ICON, WX_KO: WX_KO };
+  return { build: build, calendar: calendar, score: score, luckyOf: luckyOf, hoursOf: hoursOf, windOf: windOf, AREAS: AREAS, WX_ICON: WX_ICON, WX_KO: WX_KO };
 });
