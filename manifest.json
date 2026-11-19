@@ -1,0 +1,18 @@
+{
+  "name": "별빛 사주",
+  "short_name": "별빛 사주",
+  "description": "별이 읽어주는 나의 사주 · 매일 오늘의 운세",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./?from=home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#120a2e",
+  "theme_color": "#120a2e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

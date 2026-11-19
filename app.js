@@ -567,6 +567,7 @@
     $('rpBody').innerHTML = chs.map(function (c, i) {
       return '<article class="glass card rp-ch" id="ch-' + c.id + '"><p class="no">' + (i + 1) + ' / ' + chs.length + '</p><h3>' + esc(c.title) + '</h3><p class="chsub">' + esc(c.sub) + '</p>' + c.blocks.map(renderBlock).join('') + '</article>';
     }).join('');
+    a2hsMount();
     // 행운템은 풀이 맨 아래 (광고 안내 문구는 행운템 칸 맨 위)
     $('rpBody').parentNode.insertBefore($('rpLucky'), $('rpDonate'));
     if (luckyToday) { fillLucky('rp', luckyToday); var ad = $('rpAd'); if (ad) ad.hidden = !luckyToday.notice; $('rpLucky').hidden = false; } else $('rpLucky').hidden = true;
@@ -614,6 +615,49 @@
     $('tdBack').hidden = true;
   });
   initTdBack();
+
+  // ── 홈 화면에 추가 안내 (오늘 운세 맨 아래에만, 닫으면 14일 동안 안 띄움) ──
+  var A2HS_KEY = 'byeolbit-saju-a2hs', a2hsPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); a2hsPrompt = e; var b = $('a2hsGo'); if (b) b.hidden = false; });
+  window.addEventListener('appinstalled', function () { try { localStorage.setItem(A2HS_KEY, 'done'); } catch (e) { } var c = $('tdA2hs'); if (c) c.remove(); });
+  function a2hsEnv() {
+    var ua = navigator.userAgent || '';
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp/i.test(ua);
+    var mobile = ios || /Android/i.test(ua);
+    return { standalone: standalone, ios: ios, inApp: inApp, mobile: mobile, samsung: /SamsungBrowser/i.test(ua) };
+  }
+  function a2hsMount() {
+    var wk = $('ch-td-week'); if (!wk) return;
+    var env = a2hsEnv();
+    if (env.standalone || (!env.mobile && !a2hsPrompt)) return;
+    var v = null; try { v = localStorage.getItem(A2HS_KEY); } catch (e) { }
+    if (v === 'done') return;
+    if (v && Date.now() - (+v) < 14 * 864e5) return;
+    var body;
+    if (env.inApp) {
+      body = '<p class="td-a2hs-s">지금 앱 안에서 열려 있어서 바로 추가가 안 돼요. 오른쪽 위(또는 아래) <b>⋮</b> 메뉴에서 <b>다른 브라우저로 열기</b>를 누른 뒤 추가해 주세요.</p>';
+    } else if (env.ios) {
+      body = '<ol class="td-a2hs-steps"><li>화면 아래(또는 위) <b>공유 버튼 <span class="td-a2hs-ic">□↑</span></b>을 눌러요</li><li>목록을 올려서 <b>홈 화면에 추가</b>를 눌러요</li><li>오른쪽 위 <b>추가</b>를 누르면 끝이에요</li></ol>';
+    } else {
+      body = '<button class="btn-main td-a2hs-go" id="a2hsGo" type="button"' + (a2hsPrompt ? '' : ' hidden') + '>☾ 홈 화면에 추가하기</button>' +
+        (a2hsPrompt ? '' : '<ol class="td-a2hs-steps" id="a2hsSteps"><li>' + (env.samsung ? '화면 아래 <b>≡</b> 메뉴' : '오른쪽 위 <b>⋮</b> 메뉴') + '를 눌러요</li><li><b>홈 화면에 추가</b>(또는 <b>앱 설치</b>)를 눌러요</li><li><b>추가</b>를 누르면 끝이에요</li></ol>');
+    }
+    wk.insertAdjacentHTML('beforeend', '<div class="td-a2hs" id="tdA2hs"><p class="td-a2hs-t">✦ 홈 화면에 별빛 사주를 놓아 두면<br>내일은 한 번만 눌러도 오늘 운세가 바로 열려요</p>' + body + '<button class="td-a2hs-x" id="a2hsX" type="button">다음에 할게요</button></div>');
+    var go = $('a2hsGo');
+    if (go) go.addEventListener('click', function () {
+      if (!a2hsPrompt) return;
+      a2hsPrompt.prompt();
+      a2hsPrompt.userChoice.then(function (r) { if (r && r.outcome === 'accepted') { try { localStorage.setItem(A2HS_KEY, 'done'); } catch (e) { } var c = $('tdA2hs'); if (c) c.remove(); } }).catch(function () { });
+      a2hsPrompt = null;
+    });
+    $('a2hsX').addEventListener('click', function () { try { localStorage.setItem(A2HS_KEY, String(Date.now())); } catch (e) { } var c = $('tdA2hs'); if (c) c.remove(); });
+  }
+  // 저장 도우미: 새 버전은 늘 인터넷에서 받고, 끊겼을 때만 저장해 둔 화면을 씀
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { }); });
+  }
   // 열어 둔 창을 다음 날 다시 보면 새 날짜로 바꿔 준다 (매일 다시 보는 기능의 핵심)
   function dayKey(t) { return t.y + '-' + t.m + '-' + t.d; }
   function refreshIfNewDay() {
