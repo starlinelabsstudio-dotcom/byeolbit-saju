@@ -557,7 +557,7 @@
     }).join('') + '<div class="ny-yp"><span class="' + rep.pillar.stemElement + '">' + rep.pillar.hanja[0] + '</span><br><span class="' + rep.pillar.branchElement + '">' + rep.pillar.hanja[1] + '</span><small>오늘</small></div>';
     $('rpSummary').innerHTML = ['오늘의 이름: “' + rep.title + '”'].concat(rep.summary).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
     var chs = [
-      { id: 'td-wx', title: '오늘의 날씨', sub: '일 · 돈 · 사랑 · 사람 · 몸', blocks: [{ chips: rep.kw.map(function (k) { return '#' + k; }), label: '오늘의 낱말' }, { wx: rep.areas }] },
+      { id: 'td-wx', title: '오늘의 날씨', sub: '일 · 돈 · 사랑 · 사람 · 몸 · 공부', blocks: [{ chips: rep.kw.map(function (k) { return '#' + k; }), label: '오늘의 낱말' }, { wx: rep.areas }] },
       { id: 'td-flow', title: '오늘의 흐름', sub: '아침 · 낮 · 저녁, 그리고 좋은 시간', blocks: [{ flow: rep.flow }].concat(rep.hours.length ? [{ hours: rep.hours, text: rep.hourText }] : []) },
       { id: 'td-about', title: '오늘 글자 풀이', sub: '오늘 날 글자와 내 글자의 만남', blocks: [{ p: rep.about }, { p: rep.unLine }, { p: rep.month }, { say: rep.saying }] },
       { id: 'td-lucky', title: '오늘의 행운', sub: '나를 돕는 작은 것들', blocks: [{ lucky: rep.lucky.map(function (l, i) { return i === 0 && rep.luckyHex ? [l[0], l[1], rep.luckyHex] : l; }) }, { todo: [rep.todo, rep.rest] }] },
@@ -1034,16 +1034,16 @@
       g.fillStyle = '#c9bfe6'; g.font = '34px "Gowun Dodum"'; g.fillText(rep.date.m + '월 ' + rep.date.d + '일 ' + rep.dow + '요일 · ' + rep.pillar.ko + '(' + rep.pillar.hanja + ')일', W / 2, 240);
       g.fillStyle = '#ffe08a'; g.font = '700 62px "Gowun Batang"'; g.shadowColor = '#ffe08a'; g.shadowBlur = 20;
       g.fillText('“' + rep.title + '”', W / 2, 350); g.shadowBlur = 0;
-      var y0 = 420, rh = 112;
+      var y0 = 400, rh = 92;
       rep.areas.forEach(function (x, i) {
-        var y = y0 + i * (rh + 14);
+        var y = y0 + i * (rh + 12);
         roundRect(g, 130, y, W - 260, rh, 28); g.fillStyle = x.wx === 'sun' ? 'rgba(255,224,138,.14)' : 'rgba(255,255,255,.08)'; g.fill();
         g.lineWidth = 2; g.strokeStyle = x.wx === 'sun' ? 'rgba(255,224,138,.55)' : 'rgba(255,255,255,.2)'; g.stroke();
-        g.textAlign = 'left'; g.fillStyle = '#f3ecff'; g.font = '700 46px "Gowun Batang"'; g.fillText(x.ko, 180, y + 72);
-        g.textAlign = 'center'; g.font = '64px sans-serif'; g.fillStyle = '#fff'; g.fillText(x.icon, W / 2 + 40, y + 80);
-        g.textAlign = 'right'; g.fillStyle = x.wx === 'sun' ? '#ffe08a' : '#c9bfe6'; g.font = '38px "Gowun Dodum"'; g.fillText(x.wxKo, W - 180, y + 70);
+        g.textAlign = 'left'; g.fillStyle = '#f3ecff'; g.font = '700 44px "Gowun Batang"'; g.fillText(x.ko, 180, y + 61);
+        g.textAlign = 'center'; g.font = '56px sans-serif'; g.fillStyle = '#fff'; g.fillText(x.icon, W / 2 + 60, y + 67);
+        g.textAlign = 'right'; g.fillStyle = x.wx === 'sun' ? '#ffe08a' : '#c9bfe6'; g.font = '38px "Gowun Dodum"'; g.fillText(x.wxKo, W - 180, y + 59);
       });
-      var ly = y0 + 5 * (rh + 14) + 70;
+      var ly = y0 + rep.areas.length * (rh + 12) + 64;
       g.textAlign = 'center'; g.font = '38px "Gowun Dodum"';
       var lt = '행운의 색 ' + rep.lucky[0][1] + '   ·   행운의 숫자 ' + rep.lucky[1][1];
       var tw = g.measureText(lt).width;

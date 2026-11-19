@@ -1,5 +1,5 @@
 /*
- * 별빛 사주 — 오늘의 운세 (0.11)
+ * 별빛 사주 — 오늘의 운세 (0.11 · 0.13 공부·배움 칸)
  * build(r, a, input, ymd) → { kind:'td', date, pillar, god, title, summary[], areas[], flow[], hours[], lucky[], todo, rest, week[], tomorrow, chars }
  * r: SajuEngine.calculate 결과, a: SajuAnalysis.analyze 결과, ymd: { y, m, d } (서울 날짜)
  * 같은 사람·같은 날이면 언제 열어도 같은 결과. 글: SAJU_TD(src/today-texts.js)
@@ -20,15 +20,15 @@
   var WONJIN = { '0-7': 1, '1-6': 1, '2-9': 1, '3-8': 1, '4-11': 1, '5-10': 1 };
   var TRIPLE = [[8, 0, 4], [2, 6, 10], [5, 9, 1], [11, 3, 7]];
   var HIDDEN_MAIN = A.HIDDEN.map(function (h) { return h[h.length - 1]; }); // 지지의 본기 천간 (분석 모듈의 지장간 표에서)
-  var AREAS = ['work', 'money', 'love', 'people', 'body'];
-  var AREA_KO = { work: '일', money: '돈', love: '사랑', people: '사람', body: '몸' };
+  var AREAS = ['work', 'money', 'love', 'people', 'body', 'study'];
+  var AREA_KO = { work: '일', money: '돈', love: '사랑', people: '사람', body: '몸', study: '공부·배움' };
   // 오늘 날 글자 무리가 갈래마다 주는 기운
   var AREA_G = {
-    bigeop: { work: 0, money: -0.5, love: 0, people: 1, body: 0.5 },
-    siksang: { work: 0.5, money: 0.5, love: 1, people: 0.5, body: 0 },
-    jaeseong: { work: 0.5, money: 1, love: 0.5, people: 0, body: -0.5 },
-    gwanseong: { work: 1, money: 0, love: 0.5, people: -0.5, body: -0.5 },
-    inseong: { work: 0.5, money: -0.5, love: 0, people: 0.5, body: 1 }
+    bigeop: { work: 0, money: -0.5, love: 0, people: 1, body: 0.5, study: 0 },
+    siksang: { work: 0.5, money: 0.5, love: 1, people: 0.5, body: 0, study: 0.5 },
+    jaeseong: { work: 0.5, money: 1, love: 0.5, people: 0, body: -0.5, study: -0.5 },
+    gwanseong: { work: 1, money: 0, love: 0.5, people: -0.5, body: -0.5, study: 0.5 },
+    inseong: { work: 0.5, money: -0.5, love: 0, people: 0.5, body: 1, study: 1 }
   };
   var DIR = { wood: '동쪽', fire: '남쪽', earth: '가까운 동네', metal: '서쪽', water: '북쪽' };
   var WX = ['cloud', 'part', 'sun'];
@@ -80,7 +80,7 @@
     var db = r.pillars.day.branch, mb = r.pillars.month.branch;
     var wind = windOf(tp.branch, db), mwind = windOf(tp.branch, mb);
     if (wind === 'combine') { s.love += 1; s.people += 0.5; }
-    if (wind === 'clash') { s.love -= 1; s.body -= 0.5; }
+    if (wind === 'clash') { s.love -= 1; s.body -= 0.5; s.study -= 0.5; }
     if (wind === 'punish') s.people -= 1;
     if (wind === 'wonjin') { s.people -= 0.5; s.love -= 0.5; }
     if (wind === 'same') s.people += 0.5;
@@ -92,7 +92,7 @@
     if (!AREAS.some(function (k) { return lv[k] === 2; })) {
       var best = AREAS.slice().sort(function (x, y) { return s[y] - s[x]; })[0]; lv[best] = 2;
     }
-    // 하루 전체 날씨는 다섯 칸 그림과 어긋나지 않게 칸 수로 정한다
+    // 하루 전체 날씨는 여섯 칸 그림과 어긋나지 않게 칸 수로 정한다
     var nSun = 0, nCloud = 0;
     AREAS.forEach(function (k) { if (lv[k] === 2) nSun++; if (lv[k] === 0) nCloud++; });
     var overall = nCloud >= 2 ? 0 : (nCloud === 0 && nSun >= 3) || nSun >= 4 ? 2 : 1;
