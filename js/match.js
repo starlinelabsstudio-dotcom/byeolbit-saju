@@ -6,9 +6,9 @@
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./saju-engine.js'), require('./saju-analysis.js'), require('./match-texts.js'), require('./newyear-texts.js'), require('./deep/a.js'));
-  } else root.Match = factory(root.SajuEngine, root.SajuAnalysis, root.SAJU_MT || {}, root.SAJU_NY || {}, root.SAJU_DEEP || {});
-})(typeof self !== 'undefined' ? self : this, function (E, A, M, N, D) {
+    module.exports = factory(require('./saju-engine.js'), require('./saju-analysis.js'), require('./match-texts.js'), require('./newyear-texts.js'), require('./deep/a.js'), require('./match-verdict.js'));
+  } else root.Match = factory(root.SajuEngine, root.SajuAnalysis, root.SAJU_MT || {}, root.SAJU_NY || {}, root.SAJU_DEEP || {}, root.MatchVerdict);
+})(typeof self !== 'undefined' ? self : this, function (E, A, M, N, D, MV) {
   'use strict';
   var C = E.constants, SE = C.STEM_ELEMENT;
   var EL = ['wood', 'fire', 'earth', 'metal', 'water'];
@@ -136,6 +136,10 @@
     function who(a, b) { return a && b ? '두 사람 모두의' : a ? '나의' : pp['의']; }
     if (hapA || hapB) c6.push(P(fill(M.y27hap, { who: who(hapA, hapB) })));
     if (clA || clB) c6.push(P(fill(M.y27clash, { who: who(clA, clB) })));
+    var VD = MV.love(rA, rB, J, pp), YR = MV.year(rA, rB, 'love', pp);
+    c6.push(H('석 달씩 보는 두 사람'), P(YR.intro));
+    YR.quarters.forEach(function (q) { c6.push({ quarter: q }); });
+    c6.push(H(YR.whenHead), { when: YR.when, wide: true });
 
     // ---------- 7. 행운 데이트 ----------
     var aA = A.analyze(rA, { gender: (inA && inA.gender) || 'F' }), aB = A.analyze(rB, { gender: 'F' });
@@ -154,23 +158,27 @@
         : ELK[elB] + ' 기운(' + pLabel + ')이 ' + ELK[elA] + ' 기운(나)을 ' + (J.d === 4 ? '살려 주는' : '다듬어 주는') + ' 사이';
     var BS = { same: '같은 글자, 닮은 생활', hap: '육합, 손을 잡는 자리', half: '삼합, 같은 방향', clash: '충, 서로 끌리는 자석', wonjin: '원진, 말로 푸는 사이', punish: '형, 서로 다듬는 사이', none: '자유롭게 정이 쌓이는 사이' };
     var summary = [
+      VD.line,
+      VD.line2,
+      '함께 좋은 달: ' + YR.when[0][1],
       '두 사람은 ‘' + T.name + '’예요.',
       '기본 결: ' + stemShort,
       '함께 있을 때: ' + BS[J.day],
       M.notice
     ];
     var chapters = [
+      { id: 'mt-verdict', title: '한눈에 보는 궁합', sub: '대화 · 함께 생활 · 끌림 · 서로 채우기 · 오래 가기', blocks: [{ verdict: VD.verdict }, VD.table, P(VD.legend, 'note')] },
       { id: 'mt-base', title: '두 사람의 기본 결', sub: dA.stemHanja + ' ' + ELK[elA] + ' · ' + dB.stemHanja + ' ' + ELK[elB], blocks: clean(c1) },
       { id: 'mt-mood', title: '함께 있을 때의 분위기', sub: '배우자 자리 ' + dA.branchHanja + ' · ' + dB.branchHanja, blocks: clean(c2) },
       { id: 'mt-role', title: '서로에게 어떤 사람', sub: '십신으로 보는 두 사람', blocks: clean(c3) },
       { id: 'mt-fill', title: '서로 채워 주는 기운', sub: '다섯 기운 나란히 보기', blocks: clean(c4) },
       { id: 'mt-tips', title: '잘 지내는 법', sub: '다툴 때 해 볼 말과 조심할 점', blocks: c5 },
-      { id: 'mt-2027', title: '두 사람의 2027', sub: '정미년(丁未年)', blocks: clean(c6) },
+      { id: 'mt-2027', title: '두 사람의 2027', sub: '정미년(丁未年) · 석 달씩 보기', blocks: clean(c6) },
       { id: 'mt-date', title: '행운 데이트', sub: '두 사람을 돕는 기운', blocks: clean(c7) }
     ];
     var chars = summary.join('').length;
-    chapters.forEach(function (c) { c.blocks.forEach(function (b) { if (b.p) chars += b.p.length; if (b.list) b.list.forEach(function (t) { chars += t.length; }); }); });
-    return { type: J.type, name: T.name, keywords: T.kw, summary: summary, chapters: chapters, chars: chars, rel: J, pLabel: pLabel };
+    chapters.forEach(function (c) { c.blocks.forEach(function (b) { if (b.p) chars += b.p.length; if (b.list) b.list.forEach(function (t) { chars += t.length; }); if (b.wx) b.wx.forEach(function (x) { chars += x.text.length; }); if (b.quarter) { chars += b.quarter.head.length; b.quarter.rows.forEach(function (x) { chars += x.text.length; }); } }); });
+    return { kind: 'mt', verdict: VD, yearGood: YR.when[0][1], base: stemShort, mood: BS[J.day], type: J.type, name: T.name, keywords: T.kw, summary: summary, chapters: chapters, chars: chars, rel: J, pLabel: pLabel };
   }
 
   return { build: build, judge: judge, brRel: brRel };

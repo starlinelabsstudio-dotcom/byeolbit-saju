@@ -428,8 +428,8 @@
         (m.care ? '<p class="ny-gc care"><b>조심할 점 · ' + esc(m.care.ko) + '</b> ' + esc(m.care.text) + '</p>' : '') +
         '<p class="ny-tip">✓ ' + esc(m.tip) + '</p></div>';
     }).join('') + '</div>';
-    if (b.verdict) { var vd = b.verdict; return '<div class="ny-verdict ' + vd.wx + '"><span class="ic" aria-hidden="true">' + vd.icon + '</span><div><small>2027년 한 줄 판정 · ' + esc(vd.ko) + '</small><b>' + esc(vd.head) + '</b><p>' + esc(vd.why) + '</p>' +
-      '<p class="ny-vm"><span class="g">☀ 좋은 달 <b>' + esc(vd.good) + '</b></span><span class="c">☁ 조심할 달 <b>' + esc(vd.care) + '</b></span></p></div></div>'; }
+    if (b.verdict) { var vd = b.verdict; return '<div class="ny-verdict ' + vd.wx + '"><span class="ic" aria-hidden="true">' + vd.icon + '</span><div><small>' + esc(vd.label || '2027년 한 줄 판정') + ' · ' + esc(vd.ko) + '</small><b>' + esc(vd.head) + '</b><p>' + esc(vd.why) + '</p>' +
+      '<p class="ny-vm"><span class="g">' + esc(vd.goodLabel || '☀ 좋은 달') + ' <b>' + esc(vd.good) + '</b></span><span class="c">' + esc(vd.careLabel || '☁ 조심할 달') + ' <b>' + esc(vd.care) + '</b></span></p></div></div>'; }
     if (b.quarter) { var q = b.quarter; return '<div class="ny-q ' + q.wx + '"><div class="ny-q-h"><b>' + esc(q.label) + '</b><span class="ny-wx ' + q.wx + '">' + q.icon + ' ' + esc(q.wxKo) + '</span><span class="ny-q-ms">' + q.months.map(function (m) { return '<i class="' + m.wx + '">' + esc(m.short.replace('월', '')) + m.icon + '</i>'; }).join('') + '</span></div>' +
       '<p class="ny-q-head">' + esc(q.head) + '</p>' + q.rows.map(function (x) {
         return '<div class="ny-q-row ' + x.wx + '"><span class="k">' + x.icon + ' ' + esc(x.ko) + '<em>' + x.wxIcon + ' ' + esc(x.wxKo) + '</em></span><p>' + esc(x.text) + '</p></div>';
@@ -1056,9 +1056,16 @@
       g.fillStyle = '#ffe08a'; g.font = '700 64px "Gowun Batang"'; g.fillText('“' + rep.name + '”', W / 2, 740);
       g.fillStyle = '#f3ecff'; g.font = '42px "Gowun Dodum"'; g.fillText(rep.keywords.map(function (k) { return '#' + k; }).join('   '), W / 2, 830);
       g.fillStyle = '#c9bfe6'; g.font = '34px "Gowun Dodum"';
-      var l1 = wk ? rep.cardLines[0] : rep.summary[1].replace('기본 결: ', ''), l2 = wk ? rep.cardLines[1] : rep.summary[2].replace('함께 있을 때: ', '함께 있으면 · ');
-      wrapText(g, l1, W / 2, 930, W - 200, 50, 2);
-      wrapText(g, l2, W / 2, 1040, W - 200, 50, 2);
+      var l1 = wk ? rep.cardLines[0] : rep.base, l2 = wk ? rep.cardLines[1] : '함께 있으면 · ' + rep.mood;
+      wrapText(g, l1, W / 2, 900, W - 200, 46, 2);
+      wrapText(g, l2, W / 2, l1 && g.measureText(l1).width > W - 200 ? 1000 : 960, W - 200, 46, 1);
+      if (rep.verdict) {
+        var vc = { sun: '#ffd36e', part: '#e9e2ff', cloud: '#b9c4e6' }[rep.verdict.verdict.wx];
+        roundRect(g, 120, 1045, W - 240, 185, 30); g.fillStyle = 'rgba(255,255,255,.08)'; g.fill(); g.lineWidth = 2; g.strokeStyle = 'rgba(255,224,138,.4)'; g.stroke();
+        g.fillStyle = vc; g.font = '700 46px "Gowun Batang"'; g.fillText(rep.verdict.verdict.icon + ' ' + rep.verdict.head, W / 2, 1110);
+        g.fillStyle = '#f3ecff'; g.font = '34px "Gowun Dodum"';
+        wrapText(g, (wk ? '함께 시작하기 좋은 달 · ' : '함께 좋은 달 · ') + rep.yearGood.replace(/ \(.*\)$/, ''), W / 2, 1185, W - 300, 44, 1);
+      }
       g.fillStyle = '#c9bfe6'; g.font = '32px "Gowun Dodum"';
       var addr = (location.host + location.pathname).replace(/^www\./, '').replace(/index\.html$/, '').replace(/\/$/, '');
       g.fillText((wk ? '우리 일 궁합 보기 → ' : '우리 궁합 보기 → ') + addr, W / 2, 1290);

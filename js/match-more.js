@@ -6,9 +6,9 @@
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./saju-engine.js'), require('./saju-analysis.js'), require('./match.js'), require('./match-more-texts.js'), require('./newyear-texts.js'), require('./deep/a.js'));
-  } else root.MatchMore = factory(root.SajuEngine, root.SajuAnalysis, root.Match, root.SAJU_MT2 || {}, root.SAJU_NY || {}, root.SAJU_DEEP || {});
-})(typeof self !== 'undefined' ? self : this, function (E, A, MT, S, N, D) {
+    module.exports = factory(require('./saju-engine.js'), require('./saju-analysis.js'), require('./match.js'), require('./match-more-texts.js'), require('./newyear-texts.js'), require('./deep/a.js'), require('./match-verdict.js'));
+  } else root.MatchMore = factory(root.SajuEngine, root.SajuAnalysis, root.Match, root.SAJU_MT2 || {}, root.SAJU_NY || {}, root.SAJU_DEEP || {}, root.MatchVerdict);
+})(typeof self !== 'undefined' ? self : this, function (E, A, MT, S, N, D, MV) {
   'use strict';
   var C = E.constants, SE = C.STEM_ELEMENT;
   var EL = ['wood', 'fire', 'earth', 'metal', 'water'];
@@ -32,7 +32,7 @@
   function pairKey(a, b) { return [a, b].sort().join('-'); }
   function countChars(summary, chapters) {
     var n = summary.join('').length;
-    chapters.forEach(function (c) { c.blocks.forEach(function (b) { if (b.p) n += b.p.length; if (b.list) b.list.forEach(function (t) { n += t.length; }); if (b.lucky) b.lucky.forEach(function (l) { n += l[1].length; }); if (b.roles) b.roles.rows.forEach(function (x) { n += x.job.length + x.who.length; }); }); });
+    chapters.forEach(function (c) { c.blocks.forEach(function (b) { if (b.p) n += b.p.length; if (b.list) b.list.forEach(function (t) { n += t.length; }); if (b.lucky) b.lucky.forEach(function (l) { n += l[1].length; }); if (b.roles) b.roles.rows.forEach(function (x) { n += x.job.length + x.who.length; }); if (b.wx) b.wx.forEach(function (x) { n += x.text.length; }); if (b.quarter) { n += b.quarter.head.length; b.quarter.rows.forEach(function (x) { n += x.text.length; }); } }); });
     return n;
   }
   function people(inB) {
@@ -119,20 +119,22 @@
     var c5 = [P(F(same ? X.moodIntro.same : X.moodIntro.diff, { el: ELK[hA], elA: ELK[hA], elB: ELK[hB] })),
       { lucky: [['빛', mix('light')], ['음악', mix('music')], ['향', mix('scent')], ['함께 가면 좋은 곳', mix('place')]] }, P(X.moodEnd)];
 
+    var VD = MV.sok(J);
     var TK = { warm: '따뜻함', mild: '알맞음', cool: '시원함' }, SK = { fast: '빠른 편', mid: '보통', slow: '천천히' };
-    var summary = ['두 사람은 ‘' + T.name + '’예요.',
+    var summary = [VD.line, VD.line2, '두 사람은 ‘' + T.name + '’예요.',
       '끌림: ' + (J.day === 'hap' ? '배우자 자리 육합' : J.day === 'clash' ? '배우자 자리 충' : J.stem === 'combine' ? '천간합' : (J.dohwaAB >= 0 && J.dohwaBA >= 0) ? '서로의 도화' : (J.dohwaAB >= 0 || J.dohwaBA >= 0) ? '한쪽의 도화' : '시간이 쌓이는 끌림'),
       '온도: 나 ' + TK[J.cA] + ' · ' + pLabel + ' ' + TK[J.cB],
       '속도: 나 ' + SK[J.speedA] + ' · ' + pLabel + ' ' + SK[J.speedB],
       X.notice];
     var chapters = [
+      { id: 'sk-verdict', title: '한눈에 보는 속궁합', sub: '끌림 · 온도 · 속도 · 표현', blocks: [{ verdict: VD.verdict }, VD.table, P(VD.legend, 'note')] },
       { id: 'sk-pull', title: '서로 끌리는 힘', sub: '배우자 자리 · 천간합 · 도화', blocks: clean(c1) },
       { id: 'sk-temp', title: '두 사람의 온도', sub: '따뜻함과 시원함', blocks: clean(c2) },
       { id: 'sk-speed', title: '가까워지는 속도', sub: '양·음과 배우자 자리', blocks: clean(c3) },
       { id: 'sk-expr', title: '사랑을 표현하는 법', sub: '식상과 인성', blocks: clean(c4) },
       { id: 'sk-mood', title: '둘에게 맞는 분위기', sub: '두 사람을 돕는 기운', blocks: clean(c5) }
     ];
-    return { kind: 'sk', type: J.type, name: T.name, keywords: T.kw, summary: summary, chapters: chapters, chars: countChars(summary, chapters), rel: J, pLabel: pLabel };
+    return { kind: 'sk', verdict: VD, type: J.type, name: T.name, keywords: T.kw, summary: summary, chapters: chapters, chars: countChars(summary, chapters), rel: J, pLabel: pLabel };
   }
 
   // ================= 일 궁합 =================
@@ -212,22 +214,26 @@
     // 6. 두 사람의 2027 일 흐름
     var g27A = A.godOf(sA, 3), g27B = A.godOf(sB, 3), grA = GROUP_OF[g27A], grB = GROUP_OF[g27B];
     var lineA = (N.oneLine && N.oneLine[g27A] || {}).line, lineB = (N.oneLine && N.oneLine[g27B] || {}).line;
+    var VD = MV.work(rA, rB, J), YR = MV.year(rA, rB, 'work', pp);
     var c6 = [P(X.y27Intro), P('2027년은 나에게 ‘' + lineA + '’, ' + pp['에게'] + '는 ‘' + lineB + '’예요.'),
-      { list: ['나: ' + X.y27[grA], pLabel + ': ' + X.y27[grB]], label: '2027년 일의 흐름' }, P(grA === grB ? X.y27same : X.y27diff), P(X.notice, 'note')];
+      { list: ['나: ' + X.y27[grA], pLabel + ': ' + X.y27[grB]], label: '2027년 일의 흐름' }, P(grA === grB ? X.y27same : X.y27diff), H('석 달씩 보는 두 사람'), P(YR.intro)];
+    YR.quarters.forEach(function (q) { c6.push({ quarter: q }); });
+    c6.push(H(YR.whenHead), { when: YR.when, wide: true }, P(X.notice, 'note'));
 
     var roleShort = J.stem === 'combine' ? '손을 맞잡고 함께' : J.stem === 'same' ? '나란히 반씩 나눠' : J.stem === 'ctrl' ? (J.leader === 'A' ? '나 이끄는 쪽 · ' + pLabel + ' 받쳐 주는 쪽' : pLabel + ' 이끄는 쪽 · 나 받쳐 주는 쪽')
       : (J.giver === 'A' ? '나 생각을 건네는 쪽 · ' + pLabel + ' 결과를 내는 쪽' : pLabel + ' 생각을 건네는 쪽 · 나 결과를 내는 쪽');
     var skillShort = '잘하는 일: 나 ' + X.skillName[elA] + (elA === elB ? '' : ' · ' + pLabel + ' ' + X.skillName[elB]) + (elA === elB ? ' (둘 다)' : '');
-    var summary = ['두 사람은 ‘' + T.name + '’' + (bat(T.name) ? '이에요.' : '예요.'), '자리: ' + roleShort, skillShort, '함께하면 좋은 일: ' + jn.list[0], X.notice];
+    var summary = [VD.line, VD.line2, '함께 시작하기 좋은 달: ' + YR.when[0][1], '두 사람은 ‘' + T.name + '’' + (bat(T.name) ? '이에요.' : '예요.'), '자리: ' + roleShort, skillShort, '함께하면 좋은 일: ' + jn.list[0], X.notice];
     var chapters = [
+      { id: 'wk-verdict', title: '한눈에 보는 일 궁합', sub: '역할 나누기 · 일하는 속도 · 부딪치는 곳 · 함께 낼 힘', blocks: [{ verdict: VD.verdict }, VD.table, P(VD.legend, 'note')] },
       { id: 'wk-role', title: '두 사람의 자리', sub: dA.stemHanja + ' ' + ELK[elA] + ' · ' + dB.stemHanja + ' ' + ELK[elB], blocks: clean(c1) },
       { id: 'wk-skill', title: '각자 잘하는 일', sub: '역할 나누기 표', blocks: clean(c2) },
       { id: 'wk-speed', title: '일하는 속도', sub: '양·음과 사주의 온도', blocks: clean(c3) },
       { id: 'wk-rub', title: '부딪치기 쉬운 순간', sub: '일하는 자리(월지) ' + mA.branchHanja + ' · ' + mB.branchHanja, blocks: clean(c4) },
       { id: 'wk-join', title: '같이 하면 잘되는 일', sub: '두 사람의 기운을 합치면', blocks: clean(c5) },
-      { id: 'wk-2027', title: '두 사람의 2027 일 흐름', sub: '정미년(丁未年)', blocks: clean(c6) }
+      { id: 'wk-2027', title: '두 사람의 2027 일 흐름', sub: '정미년(丁未年) · 석 달씩 보기', blocks: clean(c6) }
     ];
-    return { kind: 'wk', type: J.type, name: T.name, keywords: T.kw, summary: summary, chapters: chapters, chars: countChars(summary, chapters), rel: J, pLabel: pLabel,
+    return { kind: 'wk', verdict: VD, yearGood: YR.when[0][1], type: J.type, name: T.name, keywords: T.kw, summary: summary, chapters: chapters, chars: countChars(summary, chapters), rel: J, pLabel: pLabel,
       cardLines: ['자리 · ' + roleShort, skillShort.replace('잘하는 일: ', '잘하는 일 · ')] };
   }
 
