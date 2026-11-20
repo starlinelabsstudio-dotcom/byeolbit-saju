@@ -245,7 +245,7 @@
         g.fillStyle = Math.random() < .2 ? '#ffe08a' : '#fff';
         g.beginPath(); g.arc(p.x, p.y, p.r, 0, 6.283); g.fill();
       });
-      var glow = Math.min(1, t / 1200);
+      var glow = Math.max(0, Math.min(1, t / 1200)); // 첫 화면 시각이 시작 시각보다 앞설 수 있어 음수 막기
       var rg = g.createRadialGradient(cx, cy, 0, cx, cy, 90 * dpr * glow + 1);
       rg.addColorStop(0, 'rgba(255,240,190,' + glow + ')'); rg.addColorStop(1, 'rgba(255,200,120,0)');
       g.fillStyle = rg; g.beginPath(); g.arc(cx, cy, 90 * dpr, 0, 6.283); g.fill();
