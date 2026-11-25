@@ -277,6 +277,7 @@
   var FALLBACK_COLOR = { wood: ['초록', '#5fe0a0'], fire: ['다홍', '#ff7b7b'], earth: ['노랑', '#f2c45a'], metal: ['은색', '#e3e9f5'], water: ['하늘색', '#6fb6ff'] };
 
   function showResult(input, r, quiet) {
+    if (window.Feedback && !quiet) window.Feedback.result();
     $('rTitle').textContent = input.name ? input.name + '님의 별자리 사주' : '나의 별자리 사주';
     var when = input.year + '년 ' + input.month + '월 ' + input.day + '일' + (input.calendar === 'lunar' ? ' (음력' + (input.leap ? ' 윤달' : '') + ')' : '');
     if (input.hour != null) when += ' ' + (input.hour < 12 ? '오전 ' : '오후 ') + (input.hour % 12 || 12) + '시 ' + input.minute + '분';
@@ -483,6 +484,7 @@
   // ---------- 2027 신년운세 ----------
   var rpMode = 'deep', RP_HOW = null;
   function setRpHead(mode) {
+    if (window.Feedback) window.Feedback.report(mode);
     if (RP_HOW === null) RP_HOW = $('rpHow').textContent;
     var isM = mode === 'mt' || mode === 'sk' || mode === 'wk';
     $('rpPill').textContent = mode === 'td' ? '☾ 별빛 오늘의 운세' : mode === 'ny' ? '🎍 별빛 2027 신년운세' : mode === 'mt' ? '💞 별빛 연애 궁합' : mode === 'sk' ? '💗 별빛 속궁합' : mode === 'wk' ? '💼 별빛 일 궁합' : '✦ 별빛 깊은 감정서';
@@ -1199,6 +1201,7 @@
     gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(vol, t0 + .02); gn.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
     o.connect(gn).connect(actx.destination); o.start(t0); o.stop(t0 + dur + .05);
   }
+  window.__sfx = function (k) { sfx(k); };
   function sfx(kind) {
     if (!soundOn) return;
     try {
